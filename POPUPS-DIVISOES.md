@@ -1,0 +1,4 @@
+
+
+## Popups compactos — 1.095
+Lista por divisão: luz, estores e contactos existentes, sensores associados com valores reais, TV e equipamentos móveis na localização atual. Garagem inclui carregador e armação/sirene em linhas separadas. Contador geral acessível na entrada do piso 3 e incluído no âmbito de consulta desse popup. Nenhuma associação ou ID é copiado da outra casa. Sensores seguem a frescura de 120 s dos banners; valores antigos são Última leitura. Consumos conservam leituras anteriores identificadas. Atualização local de validade não envia pedidos. Janela de 460px, linhas de 60px e alvos mínimos de 44px, scroll limitado à altura disponível. Abertura e consulta nunca atuam, mantêm fila/foco e confirmação existentes. Ver tests/room-inventory.test.cjs e review/rooms-fixture.html (rede intercetada, apenas equipamentos fictícios).

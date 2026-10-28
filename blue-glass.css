@@ -1,0 +1,42 @@
+/* Blue palette retained from the original Casa NL blue-glass.css.
+   Independent visual layer: no changes to plans, materials or addons. */
+:root{
+ --banner-glass:linear-gradient(110deg,rgba(69,105,129,.86),rgba(35,62,83,.86) 60%,rgba(43,52,64,.88));
+ --banner-border:rgba(197,222,241,.38);
+ --banner-text:#f4f8fc;
+ --banner-muted:#d0e1ee;
+ --ink:#233f56;
+ --muted:#637d92;
+ --teal:#426e8c;
+ --pale:#e6eef5;
+ --line:#dce5ed;
+}
+.room-label,.room-label.stairs,.dock{
+ background:var(--banner-glass);
+ color:var(--banner-text);
+ border-color:var(--banner-border);
+ backdrop-filter:blur(12px) saturate(120%);
+ -webkit-backdrop-filter:blur(12px) saturate(120%);
+}
+.room-label:hover,.room-label:focus-visible{background:linear-gradient(110deg,rgba(84,127,157,.95),rgba(45,78,105,.95));color:var(--banner-text)}
+.brand-mark{background:#426e8c}
+.brand b,.brand small,.weather-widget small,.floor-heading span,.version{color:var(--banner-muted)}
+.dock button{color:#c0d6e6}
+.dock button.active{background:rgba(141,187,219,.23);color:#f4faff}
+.dock-divider{background:#bdd8ec36}
+button:focus-visible,a:focus-visible{outline-color:#87b8d8}
+.floor-nav span{background:#a4bed2}
+.floor-nav [aria-current=page] span{background:#f4faff;box-shadow:0 0 9px #bedff754}
+dialog{background:#f5f8fb;color:var(--ink);border-color:#d5e1ec}
+.close{background:#e9eff5;color:#637f95}
+.eyebrow,.muted,dialog p,.weather-credit{color:var(--muted)}
+dialog label{color:#4f6d85}
+input,select{border-color:#cbdbe8;background:#f5f8fb;color:var(--ink)}
+input:focus-visible,select:focus-visible{outline-color:#87b8d8}
+.city-search-form button{background:#426e8c;color:#fff}
+.selected-city button,.city-result,.settings-row{background:#e5edf4;color:#3e6582}
+dialog .check-row input{accent-color:#426e8c}
+
+.settings-version{color:var(--muted)}
+
+.backup-settings{border-top:1px solid var(--line);padding-top:22px}.backup-settings h3{font-size:15px;margin:0 0 10px}.backup-actions{display:flex;flex-wrap:wrap;gap:8px}.backup-actions button{flex:1;min-height:46px;padding:11px 14px;border-radius:10px;background:#e5edf4;color:#3e6582;font-size:12px}.backup-actions .primary{background:#426e8c;color:#fff}.backup-settings h4{font-size:13px;margin-bottom:10px}#backup-summary{padding-left:18px;color:var(--muted);font-size:12px;line-height:1.9}#backup-status{min-height:20px}#backup-status.error{color:#9b493d}

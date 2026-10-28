@@ -1,0 +1,15 @@
+# Desumidificador móvel — 1.091
+
+Addon independente do termoventilador. Inicialmente piso3/casa de banho do meio, ID estável bath2, posição430,750 e contenção84×84. Reutiliza sem edição os sprites originais assets/desumidificador-dia-v1.png e desumidificador-noite-v1.png; mistura pela iluminação da divisão, sem modificar pixels das plantas ou inventar humidade/modo/temperatura do aparelho. Contorno verde indica apenas alimentação ON confirmada.
+
+Associação própria opcional dehumidifier {deviceId hexadecimal,channel0..15}; migração única casa-leal-dehumidifier-associated-v1 preenche88d798/canal0 apenas se ausente. Preserva edições e null de remoção. Grupo próprio nas definições, proteção de saída duplicada com heater/luzes/estores/armação do alarme. Não partilha papel, estado ou posição com o termoventilador.
+
+Mesma conta/fila/geração/limites da Cloud existentes. Consultas gerais30s visíveis; popup focado15s apenas seu ID, popup da divisão inclui o portátil aí colocado. Comando explícito set/switch on=true/false só com leitura booleana real online/fresca45s, sem erro/pending/configuração suja/pausa. Sem estado otimista, retry de atuação ou cancelamento de comando já enviado. Confirma por até três leituras1,5/4/10s, prazo30s. Ausência/offline/stale conserva Última leitura, sem zeros inventados e sem inferir alimentação pela potência. Excluído de grupos de iluminação/estores, cenários e reset.
+
+Reutiliza normalização testada de heater-core para relé exato e W/kWh: Gen1 meters total Watt-minute/60000, emeters Wh/1000, Gen2 switch/pm1 aenergy.total Wh/1000, sem somar famílias ambíguas. Interface distingue último consumo/total de leitura atual.
+
+Arrastável no piso atual entre divisões, setas para pequenos movimentos, seletor «Mover pela casa» para todos os pisos. Drop fora de divisão reverte; cancelar/blur/Escape repõe posição, sem popup após drag. Mover só guarda localização, nunca aciona o Shelly. Check Mostrar desumidificador só oculta addon e fica antes do slider final. Acesso alternativo em Cenários e no popup da divisão atribuída.
+
+Persistência casa-leal-dehumidifier-layout-v1 (floor/room/x/y), casa-leal-show-dehumidifier-v1 e marcador de associação, todos validados/preservados no backup. Cópias antigas da mesma conta conservam a associação quando ausente, sem misturar servidores nem substituir heater. Renders e ID/canal permanecem independentes da localização.
+
+Verificação: node --test dist/tests/*.test.cjs (164 testes). dehumidifier.test.cjs valida posição em todos os pisos/divisões, config/duplicados/compatibilidade, isolamento dos dois portáteis, consulta/comando/confirmação sem otimismo/retry, offline e backup. review/dehumidifier-fixture.html interceta toda a rede, ID falso deadbeefab02/chave fictícia; nenhum comando ao heater ou a IDs reais. UI confirmou posição inicial, popup0W/0,477kWh fictícios, comando e confirmação250W, movimento para garagem sem outro comando e render noturno. Provas review/dehumidifier-popup-1.091.png e dehumidifier-night-1.091.png. Nenhum equipamento real acionado nos testes.

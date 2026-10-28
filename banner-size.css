@@ -1,0 +1,3 @@
+.room-label,.ev-badge,.alarm-pin{transform:translate(-50%,-50%) scale(var(--banner-scale,1));transform-origin:center}
+.ev-badge{touch-action:none;cursor:grab;user-select:none;-webkit-user-select:none}.ev-badge.dragging{cursor:grabbing;z-index:6}.ev-badge:focus-visible{outline:2px solid #82c4ff;outline-offset:2px}
+.room-label::after,.ev-badge::after,.alarm-pin::after{content:"";position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:max(100%,calc(44px / var(--banner-scale,1)));height:max(100%,calc(44px / var(--banner-scale,1)))}

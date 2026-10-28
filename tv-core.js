@@ -1,0 +1,10 @@
+/* TV activity is a read-only interpretation of measured watts, never relay control. */
+(function(root,factory){if(typeof module==='object'&&module.exports)module.exports=factory();else root.CasaTVCore=factory()})(typeof window==='undefined'?globalThis:window,function(){
+ 'use strict';
+ function config(b){if(!b||typeof b!=='object'||Array.isArray(b)||Object.keys(b).some(k=>!['deviceId','channel'].includes(k))||typeof b.deviceId!=='string'||!/^[a-f0-9]{6,32}$/i.test(b.deviceId)||!Number.isInteger(b.channel)||b.channel<0||b.channel>15)throw Error('Medidor da TV inválido.');return {deviceId:b.deviceId.toLowerCase(),channel:b.channel}}
+ function status(d,b){const s=d?.status||{},i=b.channel,candidates=[s['switch:'+i],s['pm1:'+i],s.meters?.[i],s.emeters?.[i]].filter(c=>c&&typeof c==='object'),c=candidates.length===1?candidates[0]:null,p=c&&(Object.hasOwn(c,'apower')?c.apower:c.power),valid=!!c&&typeof p==='number'&&Number.isFinite(p)&&p>=0&&!d?.error&&s.is_valid!==false&&c.is_valid!==false&&!s.errors?.length&&!c.errors?.length&&!s.overtemperature&&!c.overtemperature&&!s.overpower&&!c.overpower;return {missing:!d,online:d?.online===1||d?.online===true,hasMeter:!!c,valid,powerWatts:valid?p:null}}
+ function fresh(r,now=Date.now()){return !!(r?.online&&r.valid&&!r.error&&!r.missing&&Number.isFinite(r.fetchedAt)&&now>=r.fetchedAt&&now-r.fetchedAt<=45000)}
+ function activity(watts){return typeof watts!=='number'||!Number.isFinite(watts)||watts<0?'unknown':watts>50?'on':watts>=5?'regenerating':'off'}
+ function state(binding,r,last,now=Date.now()){const recent=fresh(r,now),powerWatts=recent?r.powerWatts:null;return {configured:!!binding,fresh:recent,fetchedAt:recent?r.fetchedAt:last?.fetchedAt??null,powerWatts,activity:activity(powerWatts),lastReading:!recent&&last?{...last}:null,quality:!binding?'TV por associar':recent?'Consumo confirmado pelo Shelly':last?'Última leitura · estado por confirmar':r?.missing?'ID não encontrado':r&&!r.online?'Offline · estado por confirmar':r&&!r.hasMeter?'Canal de medição indisponível':'Estado por consultar ou consumo inválido'}}
+ return {config,status,fresh,activity,state};
+});

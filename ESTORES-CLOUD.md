@@ -1,0 +1,15 @@
+
+
+## Estores com controlo real — 1.072
+
+Substitui a limitação de demonstração para estores associados. blind-core normaliza Gen1 rollers[channel] e Gen2 cover:n no canal exato, current_pos0..100, calibração, estado e erros. Gen1 open/close significam movimento; Gen2 open/closed são finais. Estado de movimento ausente não confirma paragem. Não adivinhar saída/canal, posição ou perfil. Online e frescura45s exigidos; percentagens exigem posição válida e calibração não explicitamente falsa. Erros bloqueiam movimento, mantendo Parar disponível quando a saída está online/recente.
+
+CloudReadCore inclui os IDs configurados na mesma conta/fila com os monitores, deduplicados em lotes<=10. Comandos explícitos POST /v2/devices/api/set/cover, body{id,channel,position} com open/close/stop ou número inteiro0..100, conforme shelly-transport da app original. Mesmo servidor/chave/geração/intervalo, sem novo transporte nem credenciais. HTTP200 apenas aceita o pedido; nunca altera a posição local. Consulta imediata, acompanhamento a cada2s até90s (fila/intervalo respeitados), sem repetir comandos falhados. Normal com estores15s, outros monitores30s; visibilidade e configuração suja bloqueiam. Respeitar Retry-After429 e autorização recusada. Protetor adia enquanto comando/confirmação pendente.
+
+Home usa estado visual efetivo separado da demonstração: banners/percentagens/iluminação acompanham leituras reais; dados inválidos/offline/stale mostram traço e motivo, última posição confirmada apenas como fallback visual, ou escuro se nunca conhecida. Nunca guardar essa posição como demonstração. Popup individual e divisão permitem abrir/fechar/parar/slider; slider real só envia em change, sem comandos em input. Guardar/importar/carregar/consultar/abrir popup e Repor demonstração nunca movem equipamentos. Reset preserva leituras reais, afeta apenas demonstração.
+
+Abrir/fechar todos é uma ação explícita: comandos individuais sequenciais nos estores reais disponíveis, restantes simulados; indisponíveis ignorados e contados. UI distingue pedidos enviados de posições confirmadas. Luzes e estores sem associação continuam em demonstração. Conserva IDs e canais da1.071.
+
+100 testes passaram, incluindo Gen1/Gen2/finais, validação/canais, dados ausentes/offline/stale/erros, ausência de otimismo, cancelamento por configuração, paragem, timeout90s, não repetição, Retry-After e lotes. Teste visual exclusivamente com fixture de quatro IDs hex fictícios e Cloud intercetada: percentagens iniciais com0comandos; fecho/slider individuais; abertura pelo popup da divisão; grupo enviou exatamente4pedidos, sem duplicados; reset deixou contagem inalterada e estados reais intactos; offline mostra traço e controlos desativados. Não acionar nem alegar teste de movimentos em equipamentos reais.
+
+Fixture: review/blinds-control-fixture.html, modos offline/wrongchannel/uncalibrated/reject/hold, gerada a partir de review/blinds-fixture-header.txt e fontes atuais. Provas: review/estores-controlo-1.072.png e review/estores-offline-1.072.png. Apenas dist/, caminhos relativos e funcionamento estático Pages preservados.

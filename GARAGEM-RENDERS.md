@@ -1,0 +1,9 @@
+# Renders fornecidos da garagem — 1.055
+
+Usar assets/garagem-luz-acesa-v1.jpg e assets/garagem-luz-apagada-v1.jpg, cópias sem edição dos JPG fornecidos: Gemini_Generated_Image_kpvd64kpvd64kpvd.jpg (acesa) e Gemini_Generated_Image_wcnltpwcnltpwcnl.jpg (apagada), ambos1114×944. Não gerar nem retocar pixels. garage-render.js faz apenas apresentação/recorte SVG pelo contorno exterior das paredes, excluindo todo o exterior da fotografia. Contorno na origem: M43 24H1052V914H245V250H64L43 230Z; transformar limites43,24..1052,914 para75,460..925,1210 da planta. Recursos relativos, publicação estática em dist.
+
+Addon independente montado por CasaAddons antes dos restantes controlos da garagem. Ocultar os caminhos de pavimento/paredes/portão originais só visualmente, mantendo geometria para áreas interativas e contenção. O carro já vem nos renders: retirar apenas o grupo data-vehicle antigo nesta montagem. Manter carregador SVG/cabo/fluxo numa camada posterior ao render. Preservar fotos/carro de fallback e todos os outros pisos.
+
+home.js usa CasaGarageRender.setLight com o booleano da iluminação existente da garagem; on=acesa e off=apagada, independentemente do dia/noite. Desativar somente a máscara sintética de iluminação desta garagem para não sobrepor películas/sombras à imagem. Banners, preferências, sensores e EM intactos; não acrescentar associações ou comandos de luz. A iluminação continua em demonstração nesta app.
+
+70 testes existentes passaram. Verificação no navegador com fixture estritamente fictícia review/garage-render-fixture.html: ligar/apagar no popup da garagem troca corretamente os renders; apenas uma imagem visível, nenhum carro duplicado, máscara sintética desativada e carregador/cabo animado por cima. Recorte não mostra o fundo externo da imagem. Provas review/garagem-render-aceso-1.055.png e review/garagem-render-apagado-1.055.png. Nunca usar equipamentos reais para testes.

@@ -1,0 +1,10 @@
+/* Portable appliance geometry and exact-channel readings. No transport or actuation here. */
+(function(root,factory){if(typeof module==='object'&&module.exports)module.exports=factory(require('./banner-core.js'),require('./heater-core.js'));else root.CasaDehumidifierCore=factory(root.BannerGeometry,root.CasaHeaterCore)})(typeof window==='undefined'?globalThis:window,function(G,Portable){
+ 'use strict';const SIZE={width:84,height:84},DEFAULT={floor:'3',room:'bath2',x:430,y:750};
+ function config(b,used=new Set()){if(!b||typeof b!=='object'||Array.isArray(b)||Object.keys(b).some(k=>!['deviceId','channel'].includes(k))||typeof b.deviceId!=='string'||!/^[a-f0-9]{6,32}$/i.test(b.deviceId)||!Number.isInteger(b.channel)||b.channel<0||b.channel>15)throw Error('Shelly do desumidificador inválido.');const deviceId=b.deviceId.toLowerCase(),pair=deviceId+':'+b.channel;if(used.has(pair))throw Error('A saída do desumidificador já está associada a outro equipamento.');used.add(pair);return {deviceId,channel:b.channel}}
+ function fits(p,plans){const r=plans[p.floor]?.rooms.find(r=>r.id===p.room);return !!r&&Number.isFinite(p.x)&&Number.isFinite(p.y)&&G.rectFits(G.polygons(r.area),p,SIZE.width,SIZE.height)}
+ function layout(p,plans){if(!p||typeof p!=='object'||Array.isArray(p)||Object.keys(p).some(k=>!['floor','room','x','y'].includes(k))||!fits(p,plans))throw Error('Coloque o desumidificador dentro de uma divisão.');return {floor:p.floor,room:p.room,x:p.x,y:p.y}}
+ function locate(floor,p,plans){for(const r of [...(plans[floor]?.rooms||[])].reverse()){const candidate={floor,room:r.id,x:p.x,y:p.y};if(fits(candidate,plans))return candidate}return null}
+ function destination(floor,room,plans){const r=plans[floor]?.rooms.find(r=>r.id===room);if(!r)throw Error('Divisão inválida.');const p=G.nearestFit(G.polygons(r.area),r,SIZE.width,SIZE.height);if(!p)throw Error('Não existe espaço para colocar o desumidificador nesta divisão.');return {floor,room,x:p.x,y:p.y}}
+ return {SIZE,DEFAULT,config,layout,fits,locate,destination,status:Portable.status,fresh:Portable.fresh};
+});

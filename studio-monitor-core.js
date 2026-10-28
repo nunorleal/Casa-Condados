@@ -1,0 +1,2 @@
+/* Monitor light is a visual effect, never an equipment command. */
+(function(root,factory){if(typeof module==='object'&&module.exports)module.exports=factory();else root.CasaStudioMonitorCore=factory()})(typeof window==='undefined'?globalThis:window,function(){'use strict';function active(power,meter){return power?.on===true&&meter?.fresh===true&&Number.isFinite(meter.powerWatts)&&meter.powerWatts>0}return {active}});

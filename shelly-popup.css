@@ -1,0 +1,31 @@
+dialog.shelly-device-popup{width:min(520px,calc(100vw - 24px));max-height:calc(100dvh - 24px);padding:27px 27px 23px;border-radius:25px;border:1px solid #ccdde5;background:rgba(251,252,249,.93);color:#24485e;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
+dialog.shelly-device-popup::backdrop{background:#0a1b1d77;backdrop-filter:blur(1px)}
+dialog.shelly-device-popup .close{width:52px;height:52px;right:9px;top:9px;border:3px solid #426e8c;box-shadow:inset 0 0 0 4px #fbfcf9;background:#e9eff5;color:#63849c;font-size:31px;display:grid;place-items:center;line-height:1}
+dialog.shelly-device-popup>.eyebrow{display:block;font-size:9px;letter-spacing:1.8px;padding-right:42px;color:#63849c}
+dialog.shelly-device-popup h2{font-size:29px;font-weight:550;line-height:1.15;margin:16px 0 12px;padding-right:30px;overflow-wrap:anywhere}
+dialog.shelly-device-popup h3{font-size:17px;font-weight:550;line-height:1.3;color:#24485e;margin:0 0 6px}
+dialog.shelly-device-popup p{font-size:12px;line-height:1.5;color:#63849c}
+dialog.shelly-device-popup p:empty{display:none}
+.device-location{margin:0 0 14px}.device-state-row{display:flex;align-items:center;justify-content:space-between;gap:14px;margin:19px 0 12px}.device-state-row>div:first-child{min-width:0;flex:1}.device-state-row p{margin:0;font-size:13px}
+.device-toolbar{display:flex;justify-content:flex-end;align-items:center;gap:8px;flex-shrink:0}.device-circle,dialog.shelly-device-popup .device-toolbar button{display:grid;place-items:center;width:47px;height:47px;min-width:44px;min-height:44px;flex:none;border:1px solid #c8dbe5;border-radius:50%;background:#e9eff3a6;color:#426e8c;padding:10px;box-sizing:border-box}
+.device-toolbar svg{width:25px;height:25px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}.device-toolbar button:hover:enabled{background:#dce9f1}dialog.shelly-device-popup .device-toolbar button.is-on{background:#08a562;color:#fff;border-color:#008d54}
+dialog.shelly-device-popup .device-consumption-heading{display:flex;justify-content:space-between;align-items:baseline;gap:12px;margin:22px 0 12px}.device-consumption-heading>span{font-size:11px;line-height:1.3;color:#63849c;text-align:right}
+dialog.shelly-device-popup .device-meter-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px;margin:0 0 17px}
+dialog.shelly-device-popup .device-meter-grid>div{padding:17px 15px;border:1px solid #d9e5e9;background:#e7eef14a;border-radius:19px;min-width:0}
+dialog.shelly-device-popup .device-meter-grid>div>span{display:block;font-size:12px;color:#63849c;margin:0 0 14px}
+dialog.shelly-device-popup .device-meter-grid strong{font-size:29px;font-weight:550;color:#2d5670;line-height:1.2;overflow-wrap:anywhere}
+dialog.shelly-device-popup .dishwasher-meters strong,dialog.shelly-device-popup #tv-power,dialog.shelly-device-popup #tv-total{display:block}
+dialog.shelly-device-popup .device-meter-grid small{font-size:12px;color:#78928a}
+dialog.shelly-device-popup .device-meter-grid small[id]{display:block;font-size:10px;margin-top:6px}
+dialog.shelly-device-popup .device-meter-grid small:empty{display:none}
+.device-information{border-top:1px solid #dce6eb;margin:15px 0 0;padding-top:5px;color:#63849c;font-size:11px}.device-information>summary{cursor:pointer;min-height:44px;display:flex;align-items:center;list-style:revert}.device-information .demo-note{background:transparent;padding:0;margin:6px 0}
+.device-tv-preview{width:144px;height:100px;margin:27px auto 25px}.device-tv-preview svg{width:100%;height:100%;fill:#283c46;stroke:#5e737f;stroke-width:2}.device-tv-preview .device-tv-screen{fill:#131c26;stroke:none}#tv-dialog[data-activity=on] .device-tv-screen{fill:#3f6887}#tv-dialog[data-activity=regenerating] .device-tv-screen{fill:#554d31}
+#tv-dialog.shelly-device-popup #tv-state{font-size:13px}#tv-dialog.shelly-device-popup[data-activity=on] #tv-state{color:#27804c}#tv-dialog.shelly-device-popup[data-activity=regenerating] #tv-state{color:#9c761a}
+dialog.shelly-device-popup .heater-preview,dialog.shelly-device-popup .dehumidifier-preview{width:135px;height:115px;margin:21px auto 19px}
+dialog.shelly-device-popup .heater-power-row,dialog.shelly-device-popup .dehumidifier-power-row{gap:12px;margin:15px 0}
+dialog.shelly-device-popup .heater-power-row h3,dialog.shelly-device-popup .dehumidifier-power-row h3{font-size:16px}
+dialog.shelly-device-popup .alarm-actions{display:flex;align-items:center;gap:9px;flex-wrap:wrap}dialog.shelly-device-popup #alarm-action-label{margin-right:auto;font-size:12px}
+dialog.shelly-device-popup .heater-move,dialog.shelly-device-popup .dehumidifier-move{margin-top:15px}
+@media(max-width:420px){dialog.shelly-device-popup{padding:25px 19px 19px}dialog.shelly-device-popup h2{font-size:26px}.device-state-row{gap:9px}.device-toolbar{gap:6px}dialog.shelly-device-popup .device-toolbar button{width:44px;height:44px;padding:10px}dialog.shelly-device-popup .device-meter-grid{gap:9px}dialog.shelly-device-popup .device-meter-grid>div{padding:14px 12px}dialog.shelly-device-popup .device-meter-grid strong{font-size:24px}}
+
+dialog.shelly-device-popup .device-toolbar button.is-unknown{color:#aa914e;border-color:#d5c9a7}dialog.shelly-device-popup [id$="-power-message"]{margin:0 0 10px}
