@@ -10,7 +10,7 @@
    if(!Array.isArray(payload.ids)||!payload.ids.length||payload.ids.length>10)throw Error('Consulta de dispositivos inválida.');
    endpoint='get';body={ids:[...new Set(payload.ids.map(v=>{if(typeof v!=='string'||!/^([a-f0-9]{6,32}|XB[0-9]{1,15})$/i.test(v))throw Error('ID inválido.');return v}))],select:['status']};
   }else if(path==='light'){
-   const c={...payload};if(typeof c.id!=='string'||!(/^[a-f0-9]{6,32}$/i.test(c.id))||!Number.isInteger(c.channel)||c.channel<0||c.channel>15||!['switch','light'].includes(c.type)||typeof c.on!=='boolean')throw Error('Comando inválido.');endpoint='set/'+c.type;body={id:c.id,channel:c.channel,on:c.on,...(c.brightness!==undefined?{brightness:c.brightness}:{})};
+   const c={...payload};if(typeof c.id!=='string'||!(/^[a-f0-9]{6,32}$/i.test(c.id))||!Number.isInteger(c.channel)||c.channel<0||c.channel>15||!['switch','light'].includes(c.type)||(c.on!==undefined&&typeof c.on!=='boolean')||(c.on===undefined&&c.brightness===undefined)||(c.brightness!==undefined&&(c.type!=='light'||!Number.isInteger(c.brightness)||c.brightness<0||c.brightness>100)))throw Error('Comando inválido.');endpoint='set/'+c.type;body={id:c.id,channel:c.channel,...(c.on!==undefined?{on:c.on}:{}),...(c.brightness!==undefined?{brightness:c.brightness}:{})};
   }else if(path==='cover'){
    endpoint='set/cover';body={id:payload.id,channel:payload.channel,position:payload.position};if(typeof body.id!=='string'||!/^[a-f0-9]{6,32}$/i.test(body.id)||!Number.isInteger(body.channel)||body.channel<0||body.channel>15||!(['open','close','stop'].includes(body.position)||Number.isInteger(body.position)&&body.position>=0&&body.position<=100))throw Error('Comando inválido.');
   }else throw Error('Pedido Shelly inválido.');

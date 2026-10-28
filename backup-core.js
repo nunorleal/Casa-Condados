@@ -44,7 +44,7 @@
   if(typeof v.version!=='string'||!/^1\.\d{3}$/.test(v.version)||typeof v.exportedAt!=='string'||!Number.isFinite(Date.parse(v.exportedAt)))throw Error('Identificação da cópia inválida.');
   return {format:FORMAT,version:v.version,exportedAt:v.exportedAt,data:data(v.data,plans)};
  }
- function create(value,plans,now=new Date()){return validate({format:FORMAT,version:'1.128',exportedAt:now.toISOString(),data:value},plans)}
+ function create(value,plans,now=new Date()){return validate({format:FORMAT,version:'1.131',exportedAt:now.toISOString(),data:value},plans)}
  function write(storage,backup,plans){
   const clean=validate(backup,plans);
   if(clean.data.shellySetup){

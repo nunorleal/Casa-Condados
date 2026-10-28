@@ -12,7 +12,6 @@
  function toggle(id){if(state(id).configured)return;demo[id]=!demo[id];try{localStorage.setItem(KEY,JSON.stringify(W.demo(demo)))}catch{}draw()}
  function decorateRoom(host,windows){for(const w of windows){const row=document.createElement('div');row.className='room-device-row';row.dataset.roomWindow=w.id;const copy=document.createElement('div');copy.className='room-device-copy';const h=document.createElement('h3');h.textContent=windows.length===1?'Janela':'Janela · '+w.name;const text=document.createElement('p');text.dataset.windowState='';copy.append(h,text);const action=document.createElement('button');action.type='button';action.dataset.windowDemoToggle='';action.addEventListener('click',()=>toggle(w.id));row.append(copy,action);host.append(row)}syncRoom();window.CasaHome?.position()}
  function syncRoom(){for(const row of document.querySelectorAll('[data-room-window]')){const s=state(row.dataset.roomWindow),text=row.querySelector('[data-window-state]'),button=row.querySelector('[data-window-demo-toggle]');text.textContent=s.caption;button.hidden=s.configured;button.textContent=s.open?'Fechar · demo':'Abrir · demo';button.setAttribute('aria-label',(s.open?'Fechar':'Abrir')+' janela · demonstração');button.setAttribute('aria-pressed',String(s.open===true))}}
- document.getElementById('demo-reset').addEventListener('click',()=>{demo={};try{localStorage.setItem(KEY,'{}')}catch{}draw()});
  window.addEventListener('energychange',draw);setInterval(draw,5000);
  window.CasaWindows={mount,decorateRoom,syncRoom,state,snapshot:()=>W.demo(demo)};
 })();

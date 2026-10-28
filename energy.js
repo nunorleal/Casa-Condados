@@ -8,7 +8,7 @@
  $('energy-refresh').innerHTML='<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 0 1 9-9c2.52 0 4.93 1 6.74 2.74L21 8M21 3v5h-5M21 12a9 9 0 0 1-9 9c-2.52 0-4.93-1-6.74-2.74L3 16M8 16H3v5"/></svg>';
  dialog.querySelector('.close').addEventListener('click',()=>dialog.close());
  function open(){sync();dialog.showModal()}
- rail.addEventListener('click',open);$('open-energy').addEventListener('click',()=>{$('settings-dialog').close();open()});
+ rail.addEventListener('click',open);
  $('energy-refresh').addEventListener('click',()=>window.CasaCloudRead.refresh());
  $('energy-settings').addEventListener('click',()=>{dialog.close();window.CasaShellySetup.openEquipment('shelly-energy-group')});
  const check=$('show-energy-banner');check.checked=shown;rail.hidden=!shown;

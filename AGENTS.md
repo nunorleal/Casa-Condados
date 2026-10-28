@@ -1,6 +1,6 @@
 # Nova casa — instruções de implementação
 
-Todas as alterações ficam exclusivamente nesta pasta dist e devem funcionar com esta pasta na raiz de GitHub Pages e em abertura local. Atualizar versão visível/metadados/cache/version.json nas alterações funcionais.
+Todas as alterações ficam exclusivamente nesta pasta do projeto Casa Condados (anteriormente dist/) e devem funcionar com esta pasta na raiz de GitHub Pages e em abertura local. Atualizar versão visível/metadados/cache/version.json nas alterações funcionais.
 
 Por instrução explícita do utilizador, os novos elementos devem ser addons independentes por cima das plantas, sem redesenhar ou incorporar os elementos na geometria base. Usar addons.js para montagem das camadas; preservar paredes brancas por cima dos elementos interiores, proporções, portões, navegação e alinhamento dos banners. Só mudar a arquitetura quando o utilizador pedir explicitamente.
 
@@ -649,3 +649,17 @@ Implementar fan opcional com ID original8819dc/canal0 só quando ausente, preser
 # Símbolos maiores na garagem — 1.128
 
 Aumentar só os addons da planta: fan-pin54→66px e alarm-pin56→68px (cerca22%). Preservar tamanhos de popup, associação, estados, posições guardadas, arrastamento/contenção e slider comum. Verificado visualmente sem atuações na fixture fictícia review/garage-addons-size-fixture.html; captura review/garagem-addons-maiores-1.128.png.
+
+# Nomes das exportações — 1.129
+
+Os backups JSON usam Condados-NL-AAAA-MM-DD_HH-mm-ss.json, com data/hora Europe/Lisbon a partir de exportedAt do próprio backup. Preservar conteúdo, validação, importação e proteção de credenciais existentes. Projeto transferido por instrução do utilizador para esta pasta Casa Condados; esta é agora a raiz exclusiva das alterações.
+
+# Limpeza do menu Definições — 1.130
+
+Retirar bloco Iluminação/demonstração (texto, Ligar todas, Apagar todas, Repor demonstração) e atalhos Contador geral/consumo e Shelly Cloud/equipamentos. Manter cenários, barra do contador, campos de conta/equipamentos e rodas dentadas. Remover listeners dos elementos retirados e usar CasaShellySetup.open no regresso das definições MeteoNL, sem depender do botão removido. Sem alteração de estados ou comandos.
+
+# Intensidade das Shelly Bulb — 1.131
+
+Sliders Intensidade nos popups de sala, suite e estúdio quando a iluminação é light (também em futuras saídas light). Estilo do slider dos estores,0–100%, envio único em change/soltar; input apenas pré-visualiza Destino. commandBrightness usa a mesma fila/geração/visibilidade/guardas de commandLight, set/light com brightness inteiro0..100 sem on, preservando a ação ligar/desligar separada. Nunca enviar brilho a switch ou tentar tipos/canais alternativos. Requer leitura recente/online com brightness válido; unknown/offline/ausente bloqueia o slider, mostra traço/Última leitura.
+
+Normalizar brightness só da saída light exata (Gen1 lights/Gen2 light:n), preservando zero. Estado e valor confirmados só após leitura, não HTTP aceite. Ticket de intensidade distingue-se de ON/OFF e só confirma ao reportar brightness correspondente (tolerância1), até3 verificações/prazo30s existentes; estado ON inalterado nunca confirma sozinho. Conservar última intensidade válida e não guardar valores inventados/config novos. Sliders não alteram renders nem brilho de outras divisões por simulação. Testes fictícios tests/light-brightness.test.cjs;30 testes relevantes passaram, UI das três divisões e comando65→40% verificados em fixture isolada; captura review/intensidade-bulb-1.131.png.
