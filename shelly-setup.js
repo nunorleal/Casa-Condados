@@ -163,7 +163,6 @@
  function revealId(input){if(!input)return false;for(let p=input;p;p=p.parentElement)if(p.tagName==='DETAILS')p.open=true;input.focus({preventScroll:true});input.closest('fieldset,label')?.scrollIntoView({block:'center',behavior:'auto'});return true}
  function openDevice(kind,key){const input=kind==='alarm'?alarmFields.find(f=>f.role===key)?.input:fields.find(f=>f.kind===kind&&f.key===key)?.input;if(!input)return false;open();return revealId(input)}
  function openEquipment(id){open();const target=$(id);if(!target)return false;return revealId(target.matches('input')?target:target.querySelector('input'))}
- $('open-shelly').addEventListener('click',()=>open());
  window.addEventListener('storage',e=>{if(e.key===KEY&&e.newValue!==baseline)status('A configuração mudou noutra janela. Recarregue antes de guardar.',true)});
  window.addEventListener('roomnameschange',()=>{for(const d of host.querySelectorAll('[data-setup-room]')){const [floor,room]=d.dataset.setupRoom.split(':');d.querySelector('summary').textContent=window.CasaRoomNames.get(floor,room)}});
  window.CasaShellySetup={open,openEquipment,openDevice,isDirty:blocked,snapshot:()=>C.setup(saved,plans)};

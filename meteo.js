@@ -38,7 +38,7 @@
   if(restore){savedDialogs.filter(d=>d.isConnected).slice(-1).forEach(d=>d.showModal());lastFocus?.focus?.()}
   savedDialogs=[];window.dispatchEvent(new Event('casahomevisible'));
  }
- function settings(){home(false);document.getElementById('open-shelly').click()}
+ function settings(){home(false);window.CasaShellySetup.open()}
  function toggleLamp(){return CasaMeteoCore.lampAction(window.CasaShelly,settings)}
  window.CasaMeteoBridge={visible:()=>!host.hidden,preferences:CasaMeteoCore.preferences,ready,open,home:()=>home(),settings,toggleLamp,
   realTemperature:()=>{const s=window.CasaCloudRead?.temperatureSnapshot();return CasaMeteoCore.realTemperature(s?.configured,s?.reading)},
