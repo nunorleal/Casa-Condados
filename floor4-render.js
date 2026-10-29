@@ -20,6 +20,8 @@
   return `<g transform="translate(55 90) scale(${830/807} ${1188/1168}) translate(-51 -10)"><defs><clipPath id="floor4-photo-outline"><path d="${OUTLINE}"/></clipPath>${clips}<image id="floor4-source-closed" href="assets/sotao-estores-fechados-v1.jpg" width="896" height="1190"/><image id="floor4-source-day" href="assets/sotao-diurno-v1.jpg" width="896" height="1190"/><image id="floor4-source-electric" href="assets/sotao-luz-eletrica-v1.jpg" width="896" height="1190"/><image id="floor4-source-night" href="assets/sotao-noturno-abertos-v1.jpg" width="896" height="1190"/></defs><g clip-path="url(#floor4-photo-outline)">${use('closed')}<g data-floor4-image="day">${natural('day')}</g><g data-floor4-image="night" style="display:none">${natural('night')}</g><g data-floor4-image="electric">${electric}</g></g></g>`;
  }
  function mount(svg){
+  // Fit the visible photograph outline instead of its former empty border.
+  svg.dataset.fitViewBox="55 90 830 1188";
   const base=svg.querySelector(':scope > g');if(!base||svg.dataset.floor4Render)return;
   for(const child of [...base.children])child.style.display='none';
   const layer=document.createElementNS(NS,'g');layer.dataset.addon='floor4-render';layer.setAttribute('pointer-events','none');layer.setAttribute('aria-hidden','true');layer.innerHTML=markup();base.append(layer);svg.dataset.floor4Render='v1';
