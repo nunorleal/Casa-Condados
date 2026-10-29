@@ -5,7 +5,7 @@
  function build(credentials,path,payload){
   const host=CORE.server(credentials.server),key=credentials.authKey;
   if(typeof key!=='string'||!key.trim()||key.length>4096)throw Error('Indique a chave de autorização Shelly Cloud.');
-  let endpoint,body,keys=[];
+  let endpoint,body;
   if(path==='status'){
    if(!Array.isArray(payload.ids)||!payload.ids.length||payload.ids.length>10)throw Error('Consulta de dispositivos inválida.');
    endpoint='get';body={ids:[...new Set(payload.ids.map(v=>{if(typeof v!=='string'||!/^([a-f0-9]{6,32}|XB[0-9]{1,15})$/i.test(v))throw Error('ID inválido.');return v}))],select:['status']};
@@ -15,7 +15,7 @@
    endpoint='set/cover';body={id:payload.id,channel:payload.channel,position:payload.position};if(typeof body.id!=='string'||!/^[a-f0-9]{6,32}$/i.test(body.id)||!Number.isInteger(body.channel)||body.channel<0||body.channel>15||!(['open','close','stop'].includes(body.position)||Number.isInteger(body.position)&&body.position>=0&&body.position<=100))throw Error('Comando inválido.');
   }else throw Error('Pedido Shelly inválido.');
   const url=new URL('/v2/devices/api/'+endpoint,host);url.searchParams.set('auth_key',key);
-  return {url:url.href,body,keys,path};
+  return {url:url.href,body,path};
  }
  function decode(request,status,text){
   if(status===401||status===403)throw Error('Autorização Shelly recusada. Confirme a chave e o servidor.');
@@ -29,15 +29,7 @@
   }
   if(data!==null&&(typeof data!=='object'||Array.isArray(data)))throw Error('Resposta de comando inesperada da Shelly Cloud.');
   if(request.path==='cover'||request.path==='light')return {accepted:true};
-  const failed={};
-  if(data?.failedCommands!==undefined){
-   if(!data.failedCommands||typeof data.failedCommands!=='object'||Array.isArray(data.failedCommands))throw Error('Resposta de grupo inesperada da Shelly Cloud.');
-   for(const [id,code]of Object.entries(data.failedCommands)){
-    const k=id.toLowerCase();if(!request.keys.includes(k)||typeof code!=='string'||!code)throw Error('Resultado de grupo inesperado da Shelly Cloud.');
-    failed[k]=code;
-   }
-  }
-  return {accepted:request.keys.filter(k=>!Object.hasOwn(failed,k)),failed};
+  throw Error('Tipo de resposta Shelly inválido.');
  }
  function create({fetch:send=globalThis.fetch,storage=null,now=()=>Date.now(),sleep=ms=>new Promise(resolve=>setTimeout(resolve,ms)),interval=1500,timeout=20000,onChange=()=>{},locks=globalThis.navigator?.locks}={}){
   let chain=Promise.resolve(),activeRequest=null,lastScope='';const pools=new Map();
