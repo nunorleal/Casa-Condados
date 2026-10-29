@@ -679,3 +679,11 @@ Por pedido do utilizador, mover #open-house-summary para a lateral esquerda, por
 # Botões de fechar alinhados — 1.135
 
 popup-compact.css define o botão .close comum aos popups:44×44px, sem padding/margem, right igual ao padding lateral do conteúdo17px (12px em ecrãs≤360px), top12px. X desenhado por dois traços CSS centrados em50%/50%, evitando desvio de baseline do glifo ×. Preservar texto/aria-label/listeners existentes, foco e Escape. Mesmo aro2px/inset3px em todos. Verificação visual no popup de divisão e resumo, fecho normal confirmado com fixture fictícia; captura review/fechar-alinhado-1.135.png.
+
+# Coluna lateral no telefone — 1.136
+
+Os indicadores Shelly, resumo da casa, contador e pisos partilham --side-rail-left: 6 px no desktop e 1 px até 550 px, respeitando safe-area-inset-left. As camadas dos pisos seguem --cloud-rail-width (50 px no desktop e 36 px no telefone), centradas no mesmo eixo dos banners. Preservar navegação, estados, popups e fila Shelly. Verificação visual com fixture fictícia de 375 px, sem comandos reais.
+
+# Planta ampliada — 1.137
+
+O contentor da planta reserva a largura da coluna lateral mais 10 px à esquerda e 10 px à direita, respeitando as áreas seguras. Remover o antigo recuo móvel de 62 px. Os renders dos pisos 3 e 4 definem data-fit-view-box pelos limites do seu contorno fotográfico para não reservar margens vazias internas. Manter o ajuste proporcional completo com CasaPlanViewCore.fit: em ecrãs baixos, a altura disponível continua a limitar a escala, sem cortar a planta. Preservar zoom, arrastamento, paredes, sobreposições e comandos.
