@@ -663,3 +663,19 @@ Retirar bloco Iluminação/demonstração (texto, Ligar todas, Apagar todas, Rep
 Sliders Intensidade nos popups de sala, suite e estúdio quando a iluminação é light (também em futuras saídas light). Estilo do slider dos estores,0–100%, envio único em change/soltar; input apenas pré-visualiza Destino. commandBrightness usa a mesma fila/geração/visibilidade/guardas de commandLight, set/light com brightness inteiro0..100 sem on, preservando a ação ligar/desligar separada. Nunca enviar brilho a switch ou tentar tipos/canais alternativos. Requer leitura recente/online com brightness válido; unknown/offline/ausente bloqueia o slider, mostra traço/Última leitura.
 
 Normalizar brightness só da saída light exata (Gen1 lights/Gen2 light:n), preservando zero. Estado e valor confirmados só após leitura, não HTTP aceite. Ticket de intensidade distingue-se de ON/OFF e só confirma ao reportar brightness correspondente (tolerância1), até3 verificações/prazo30s existentes; estado ON inalterado nunca confirma sozinho. Conservar última intensidade válida e não guardar valores inventados/config novos. Sliders não alteram renders nem brilho de outras divisões por simulação. Testes fictícios tests/light-brightness.test.cjs;30 testes relevantes passaram, UI das três divisões e comando65→40% verificados em fixture isolada; captura review/intensidade-bulb-1.131.png.
+
+# Limpeza — 1.132
+
+Retiradas páginas/capturas históricas de review e wall-relief.js já desativado. Não voltar a gerar dezenas de cópias completas antigas: manter a fixture fictícia atual e fontes pequenas. Referências antigas a provas review em notas históricas não representam dependências da aplicação; recuperar no Git quando necessário. Manter testes/fontes MeteoNL/geradores/recursos dinâmicos e compatibilidade de backups. Ver LIMPEZA.md.
+
+# Resumo da casa — 1.133
+
+Indicadores no cabeçalho e popup em house-summary.js/css/core. Só estados confirmados de janelas e luzes associadas, demonstrações excluídas; unknown/histórico nunca contam como fechado/desligado. Saúde deduplicada por ID via healthSnapshot da fila, distingue offline/erro/indisponível de stale/pending, sem pedidos adicionais. Clique só navega; comandos sempre nos controlos individuais existentes. Resumo ocupa o lugar do aviso geral isolado de offline, preservando marcadores individuais. Montar antes de MeteoNL, adaptar cabeçalho móvel e manter nomes personalizados. Ver RESUMO-CASA.md e testes fictícios house-summary.test.cjs.
+
+# Resumo lateral e progresso circular — 1.134
+
+Por pedido do utilizador, mover #open-house-summary para a lateral esquerda, por baixo de #shelly-activity agora circular e acima da barra de energia/pisos. Novo ícone SVG de janela com duas folhas abertas. A esfera enche verticalmente com --cloud-progress e conserva data-state, cores e popup. Remover adaptações do cabeçalho criadas apenas para o resumo. Não alterar cálculos, fila, contagens, estados ou comandos. Dimensões/posições por variáveis em cloud-activity.css e house-summary.css; ver RESUMO-CASA.md e captura review/resumo-lateral-1.134.png.
+
+# Botões de fechar alinhados — 1.135
+
+popup-compact.css define o botão .close comum aos popups:44×44px, sem padding/margem, right igual ao padding lateral do conteúdo17px (12px em ecrãs≤360px), top12px. X desenhado por dois traços CSS centrados em50%/50%, evitando desvio de baseline do glifo ×. Preservar texto/aria-label/listeners existentes, foco e Escape. Mesmo aro2px/inset3px em todos. Verificação visual no popup de divisão e resumo, fecho normal confirmado com fixture fictícia; captura review/fechar-alinhado-1.135.png.
