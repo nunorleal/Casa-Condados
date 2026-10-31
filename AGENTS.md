@@ -687,3 +687,11 @@ Os indicadores Shelly, resumo da casa, contador e pisos partilham --side-rail-le
 # Planta ampliada — 1.137
 
 O contentor da planta reserva a largura da coluna lateral mais 10 px à esquerda e 10 px à direita, respeitando as áreas seguras. Remover o antigo recuo móvel de 62 px. Os renders dos pisos 3 e 4 definem data-fit-view-box pelos limites do seu contorno fotográfico para não reservar margens vazias internas. Manter o ajuste proporcional completo com CasaPlanViewCore.fit: em ecrãs baixos, a altura disponível continua a limitar a escala, sem cortar a planta. Preservar zoom, arrastamento, paredes, sobreposições e comandos.
+
+# Roda dentada nos detalhes — 1.138
+
+Os botões antes identificados como Detalhes nos popups das divisões usam agora room-round e uma cópia do SVG de #open-settings, igual à iluminação. Preservar ações, nomes acessíveis e controlos de alimentação. Não voltar a substituir o ícone por texto em CasaRoomPopup.decorate.
+
+# Sobreposição dos pisos — 1.139
+
+Passo vertical das três camadas reduzido de 16 para 12 px em floor-layers.css. Preservar largura partilhada com os banners, eixo lateral, ícones, cores, ordem, foco e ações de navegação.
