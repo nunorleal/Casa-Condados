@@ -695,3 +695,7 @@ Os botões antes identificados como Detalhes nos popups das divisões usam agora
 # Sobreposição dos pisos — 1.139
 
 Passo vertical das três camadas reduzido de 16 para 12 px em floor-layers.css. Preservar largura partilhada com os banners, eixo lateral, ícones, cores, ordem, foco e ações de navegação.
+
+# Regeneração da TV — 1.140
+
+TV da sala: menos de 5 W desligada, 5 a 40 W inclusive em regeneração, mais de 40 W ligada. Apenas interpretação de consumo válido e recente; preservar guardas offline/erro e não atuar automaticamente sobre o relé.
