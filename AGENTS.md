@@ -699,3 +699,7 @@ Passo vertical das três camadas reduzido de 16 para 12 px em floor-layers.css. 
 # Regeneração da TV — 1.140
 
 TV da sala: menos de 5 W desligada, 5 a 40 W inclusive em regeneração, mais de 40 W ligada. Apenas interpretação de consumo válido e recente; preservar guardas offline/erro e não atuar automaticamente sobre o relé.
+
+# Regeneração da TV — 1.141
+
+Correção do utilizador: regeneração entre 5 e 35 W inclusive; ligada acima de 35 W; desligada abaixo de 5 W. Substitui o limiar de 40 W da versão anterior, mantendo as guardas e comandos existentes.
