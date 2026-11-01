@@ -703,3 +703,7 @@ TV da sala: menos de 5 W desligada, 5 a 40 W inclusive em regeneração, mais de
 # Regeneração da TV — 1.141
 
 Correção do utilizador: regeneração entre 5 e 35 W inclusive; ligada acima de 35 W; desligada abaixo de 5 W. Substitui o limiar de 40 W da versão anterior, mantendo as guardas e comandos existentes.
+
+# Câmaras UniFi — 1.142
+
+Reproduzir o acesso explícito da DomoticaNL V2: #open-cameras no cabeçalho abre a mesma vista de quatro câmaras HTTPS UniFi Protect em nova página, com noopener noreferrer e no-referrer. Sem iframe, pedidos em segundo plano, credenciais, alterações de rede ou comandos Shelly. Usa a sessão UniFi existente; a autenticação pertence à página UniFi. cameras.css adapta os controlos ao telefone. Não guardar imagens das câmaras nem abrir transmissões reais nos testes.

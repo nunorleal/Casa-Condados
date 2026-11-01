@@ -1,0 +1,5 @@
+/* Same explicit UniFi Protect access as DomoticaNL V2; no background requests. */
+.top-actions .cameras-link{font-family:inherit;text-decoration:none;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+.top-actions .cameras-link svg{display:block;flex:none}
+@media(max-width:550px){.top-actions{gap:4px}.top-actions .top-settings{width:40px;min-width:40px;height:40px}.topbar{column-gap:5px}.header-information{min-width:0}.brand{min-width:0}}
+@media(max-width:360px){.top-actions{gap:2px}.top-actions .top-settings{width:36px;min-width:36px;height:40px}.topbar{padding-left:9px;padding-right:9px}}
