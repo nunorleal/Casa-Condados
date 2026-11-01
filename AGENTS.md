@@ -707,3 +707,19 @@ Correção do utilizador: regeneração entre 5 e 35 W inclusive; ligada acima d
 # Câmaras UniFi — 1.142
 
 Reproduzir o acesso explícito da DomoticaNL V2: #open-cameras no cabeçalho abre a mesma vista de quatro câmaras HTTPS UniFi Protect em nova página, com noopener noreferrer e no-referrer. Sem iframe, pedidos em segundo plano, credenciais, alterações de rede ou comandos Shelly. Usa a sessão UniFi existente; a autenticação pertence à página UniFi. cameras.css adapta os controlos ao telefone. Não guardar imagens das câmaras nem abrir transmissões reais nos testes.
+
+# Meteo até estore aberto — 1.143
+
+Opção nightUntilBlindOpen, desativada por omissão e validada por CasaMeteoCore.preferences/backup. Igual à DomoticaNL V2: horário ativa vermelho/noturno; depois do fim mantém até observar master-north real online/fresco/calibrado exatamente a 100%. Só expor configured/ready/open/position pelo bridge, usando blindSnapshot existente, sem consultas, comandos, IDs ou credenciais adicionais. Nunca aceitar demonstração/histórico/99,9% como abertura completa. Estado local de apresentação casa-nl-meteo-bedside-v1 conserva retenção ao recarregar; alteração de preferências relevantes invalida-o. Fechar depois da libertação não rearma esse ciclo. Fontes React recompiladas em meteo/assets/app-1.143.js/css, IIFE e file:// srcdoc preservados. Testes só fictícios em meteo-bedside.test.cjs.
+
+# Lua Meteo com fases — 1.144
+
+Igual à DomoticaNL V2 2.66: WeatherIcon/LunarMoon/lunar.cjs e SunCalc local calculam silhueta, fração e lado iluminado na data atual ou hora de previsão. Disco SVG ilustrado, inversão para hemisfério sul, descrição acessível da fase e percentagem aproximada, nuvens/chuva à frente e modo vermelho preservado. Animações respeitam preferências e movimento reduzido. Sem serviços lunares, imagens remotas, consultas adicionais ou comandos. Licença SunCalc distribuída nas fontes e meteo/assets. Preservar a opção noturna até estore aberto. Bundle clássico app-1.144, fontes em meteo-src, testes lunares fictícios.
+
+# Símbolos Meteo maiores — 1.145
+
+Igual à DomoticaNL V2 2.67: grupo weather-symbol dentro de WeatherIcon com escala 1.25 em torno do centro 40/35 do viewBox. Aumenta lua, sol, nuvens e precipitação sem mudar os slots ou a grelha. Preservar fases lunares, animações, modo vermelho, preferências e opção do estore. Fontes recompiladas no bundle app-1.145.
+
+# Dimensão visual uniforme na Meteo — 1.146
+
+Igual à DomoticaNL V2 2.69: normalizar os limites completos de cada WeatherIcon para 63 unidades, centradas em 40/35 no viewBox 80×70, incluindo precipitação. Substitui a escala CSS de 25% por transform calculado no componente. Preservar slots, grelhas, fases lunares, hemisfério, animações e opção noturna do estore. Fontes recompiladas em app-1.146.
