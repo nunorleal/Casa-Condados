@@ -3,6 +3,7 @@
 const plans=window.CasaPlans,order=['4','3','-1'];let current='3',lastChange=0,floorAnimationTimer;
 const $=id=>document.getElementById(id),stage=$('plan-stage');
 function positionLabels(){
+ window.CasaRoomPowerView?.position();
  window.CasaLabelLayout.position(stage,$('plan-canvas').querySelector('svg'));
  window.CasaDehumidifier?.position();window.CasaHeater?.position();window.CasaBalconyAppliances?.position();window.CasaDishwasher?.position();window.CasaTV?.position();window.CasaHome?.position();window.CasaEntrance?.position();window.CasaEVRead?.position();window.CasaBalconySensor?.position();window.CasaGate?.position();window.CasaAlarm?.position();window.CasaFan?.position();
 }

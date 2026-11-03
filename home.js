@@ -22,7 +22,7 @@
  function demoPosition(id){return C.position(visualState(),id)}
  function followerText(id){const source=C.DEMO_BLIND_LINKS[id];return source?(followers.isManual(id)?'Manual · retoma no próximo movimento da origem':'A seguir '+C.WINDOWS.find(w=>w.id===source).name):''}
  function blindText(id){const s=blindInfo(id);return s.configured?[(s.position===null?(s.lastPosition===null?'—':s.lastPosition+'% · Última leitura'):s.position+'% aberto'),s.moving?(s.state==='opening'?'A abrir':'A fechar'):'',s.quality,s.pending?'A confirmar movimento':''].filter(Boolean).join(' · '):demoPosition(id)+'% aberto · demonstração'+(followerText(id)?' · '+followerText(id):'')}
- async function changeBlind(id,target){const s=blindInfo(id);if(s.configured){await window.CasaCloudRead.commandBlind(id,target);update();syncBlind();syncRoom();return}if(target==='stop')return;followers.manual(id,visualState(),blindInfo);state.blinds[id]=target==='open'?100:target==='close'?0:target;remember();syncBlind();syncRoom()}
+ async function changeBlind(id,target){const s=blindInfo(id);if(s.configured){const result=await window.CasaCloudRead.commandBlind(id,target);update();syncBlind();syncRoom();return result?.accepted===true}if(target==='stop')return;followers.manual(id,visualState(),blindInfo);state.blinds[id]=target==='open'?100:target==='close'?0:target;remember();syncBlind();syncRoom()}
  function roomWindows(f,id){return C.WINDOWS.filter(w=>w.floor===f&&w.room===id)}
  function label(w){return w.name+' · '+blindText(w.id)}
  function openBlind(id){
@@ -56,6 +56,8 @@
  function mount(svg,floor){
   current={svg,floor,shades:new Map(),warms:new Map(),beams:new Map(),hits:new Map(),banners:new Map()};overlay.replaceChildren();
   const p=window.CasaPlans[floor],base=svg.querySelector(':scope > g'),shape=base.querySelector(':scope > path'),defs=el('defs'),layer=el('g',{'data-addon':'room-lighting','pointer-events':'none'});
+  // Local slats follow each bar's axis; only the measured closed portion is filled.
+  for(const vertical of [true,false])for(const old of [false,true]){const pattern=el('pattern',{id:'home-blind-slats-'+(vertical?'v':'h')+(old?'-last':''),width:vertical?18:7,height:vertical?7:18,patternUnits:'userSpaceOnUse'});pattern.append(el('rect',{width:vertical?18:7,height:vertical?7:18,fill:old?'#c3a270':'#426e8c'}),el('path',{d:vertical?'M0 1H18':'M1 0V18',stroke:old?'#f1dfbf':'#d1e3ed','stroke-opacity':'.65','stroke-width':1}));defs.append(pattern)}
   const soft=el('filter',{id:'home-soft-mask',x:'-20%',y:'-20%',width:'140%',height:'140%'});soft.append(el('feGaussianBlur',{stdDeviation:7}));defs.append(soft);
   const mask=el('mask',{id:'home-dark-mask',maskUnits:'userSpaceOnUse',x:-100,y:-100,width:1500,height:2000}),maskContent=el('g',{filter:'url(#home-soft-mask)'});mask.append(maskContent);
   maskContent.append(el('rect',{x:-100,y:-100,width:1500,height:2000,fill:'white','data-mask-base':''}));
@@ -83,7 +85,7 @@
    const x=Math.min(w.x1,w.x2),y=Math.min(w.y1,w.y2),width=Math.abs(w.x2-w.x1),height=Math.abs(w.y2-w.y1);
    const g=el('g',{'class':'blind-window',role:'button',tabindex:0,'aria-label':label(w),'data-blind-window':w.id});
    const target=el('rect',{x:x-14,y:y-14,width:width+28,height:height+28,fill:'transparent',class:'blind-hit'}),ring=el('rect',{x:x-(w.photoBounds?2:7),y:y-(w.photoBounds?2:7),width:width+(w.photoBounds?4:14),height:height+(w.photoBounds?4:14),rx:3,fill:'none',class:'blind-highlight','vector-effect':'non-scaling-stroke'});
-   const barGeometry=window.CasaBlindBarCore.geometry(w),bar=el('g',{class:'blind-position-bar','aria-hidden':'true','pointer-events':'none'}),track=el('rect',{x:barGeometry.x,y:barGeometry.y,width:barGeometry.width,height:barGeometry.height,rx:2,class:'blind-bar-track','vector-effect':'non-scaling-stroke'}),fill=el('rect',{x:barGeometry.x,y:barGeometry.y,width:0,height:0,rx:2,class:'blind-bar-fill'});bar.append(track,fill);
+   const barGeometry=window.CasaBlindBarCore.geometry(w),bar=el('g',{class:'blind-position-bar','data-orientation':barGeometry.vertical?'vertical':'horizontal','aria-hidden':'true','pointer-events':'none'}),track=el('rect',{x:barGeometry.x,y:barGeometry.y,width:barGeometry.width,height:barGeometry.height,rx:2,class:'blind-bar-track','vector-effect':'non-scaling-stroke'}),fill=el('rect',{x:barGeometry.x,y:barGeometry.y,width:0,height:0,rx:2,class:'blind-bar-fill'});bar.append(track,fill);
    g.append(target,bar,ring);g.addEventListener('click',e=>{e.stopPropagation();openBlind(w.id)});g.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();openBlind(w.id)}});
    g.addEventListener('pointerenter',()=>current?.banners.get(w.id)?.classList.add('window-hover'));g.addEventListener('pointerleave',()=>current?.banners.get(w.id)?.classList.remove('window-hover'));hits.append(g);current.hits.set(w.id,{g,target,w,x,y,width,height,bar,fill,barGeometry});
    const banner=document.createElement('button');banner.type='button';banner.className='blind-banner';banner.dataset.blind=w.id;
@@ -105,7 +107,7 @@
   }
   if(floor==='3')window.CasaFloor3Render?.sync(current.svg,displayState,night,p.rooms,balconyDay);
   if(floor==='4')window.CasaFloor4Render?.sync(current.svg,displayState,night,p.rooms);
-  window.CasaHeater?.lighting(displayState,night);window.CasaDehumidifier?.lighting(displayState,night);
+  window.CasaCats?.lighting(displayState,night);window.CasaHeater?.lighting(displayState,night);window.CasaDehumidifier?.lighting(displayState,night);
   current.svg.querySelector('[data-mask-base]').setAttribute('fill',night?'white':'black');
   for(const w of C.WINDOWS.filter(w=>w.floor===floor)){
    const info=blindInfo(w.id),p=C.position(displayState,w.id);current.beams.get(w.id).setAttribute('opacity',C.beamOpacity(displayState,w.id,night));
@@ -182,5 +184,6 @@
 
  async function setAllBlinds(value){if(value!==0&&value!==100)throw new TypeError('Posição de estores inválida');const result={sent:0,simulated:0,skipped:0};for(const w of C.WINDOWS){const s=blindInfo(w.id);if(!s.configured){followers.manual(w.id,visualState(),blindInfo);state.blinds[w.id]=value;result.simulated++;continue}if(!s.canControl){result.skipped++;continue}try{await window.CasaCloudRead.commandBlind(w.id,value===100?'open':'close');result.sent++}catch{result.skipped++}}remember();syncRoom();return result}
  window.addEventListener('roomnameschange',position);window.addEventListener('energychange',()=>{update();syncBlind();syncRoom()});window.addEventListener('environmentchange',update);
+ window.CasaBlindDragAdapter={selector:'.blind-window,.blind-banner',id:node=>node.dataset.blindWindow||node.dataset.blind,snapshot(id){const s=blindInfo(id);return {configured:s.configured,position:s.configured?s.position:demoPosition(id),allowed:!s.configured||s.canPosition,token:s.configured?'real:'+s.revision:'demo'}},commit:changeBlind};
  window.CasaHome={mount,position,decorateRoom,setAllLights,setAllBlinds,snapshot:()=>C.demo(state,window.CasaPlans)};
 })();

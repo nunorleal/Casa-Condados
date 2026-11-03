@@ -24,3 +24,5 @@ test('a failed storage write rolls back every changed preference',()=>{
  assert.throws(()=>C.write(s,C.create(full,plans),plans),/anteriores foram repostos/);
  assert.equal(s.getItem(C.KEYS.environment),'old-environment');assert.equal(s.getItem(C.KEYS.showRoomLabels),'old-labels');assert.equal(s.values.size,2);
 });
+
+test('cat visibility roundtrips as an optional boolean without replacing older preferences',()=>{const b=C.create({showCats:false},plans),s=storage();C.write(s,b,plans);assert.equal(s.getItem(C.KEYS.showCats),'false');assert.throws(()=>C.create({showCats:'false'},plans));C.write(s,C.create({showRoomLabels:true},plans),plans);assert.equal(s.getItem(C.KEYS.showCats),'false')});

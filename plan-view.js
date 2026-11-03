@@ -30,7 +30,7 @@
   // A single pointer on a banner belongs to its label drag; two pointers zoom.
   points.set(e.pointerId,{x:e.clientX,y:e.clientY});
   if(points.size>=2){pinch();e.preventDefault();e.stopImmediatePropagation();return}
-  if(e.target.closest('.room-label,.balcony-sensor-badge,.blind-banner,.blind-window,.ev-charger,.dehumidifier-object,.heater-object,.ev-badge,.balcony-appliance-hit,.dishwasher-plan-hit,.tv-plan-hit,.entrance-contact-hit,.garage-gate-hit,.alarm-pin,.fan-pin')){mode='label';return}
+  if(e.target.closest('.room-power-banner,.room-label,.balcony-sensor-badge,.blind-banner,.blind-window,.ev-charger,.dehumidifier-object,.heater-object,.ev-badge,.balcony-appliance-hit,.dishwasher-plan-hit,.tv-plan-hit,.entrance-contact-hit,.garage-gate-hit,.alarm-pin,.fan-pin')){mode='label';return}
   mode=base.width/view.width>1.01?'pan':'swipe';
   gesture={x:e.clientX,y:e.clientY,view:copy(view),moved:false};
   stage.setPointerCapture(e.pointerId);

@@ -46,6 +46,7 @@
   '3:bath3':SALA_SOURCES
  };
  function lighting(v,floor,room,night){
+  if(floor==='4'&&(typeof room==='string'?room:room.id)==='stairs4')return lighting(v,floor,'living2',night);
   const id=typeof room==='string'?room:room.id,on=light(v,floor,floor==='3'&&id==='stairs3'?'living':id),exterior=id.startsWith('balcony'),shared=INDIRECT_SOURCES[key(floor,id)];
   const sources=shared||WINDOWS.filter(w=>w.floor===floor&&w.room===id).map(w=>w.id),positions=sources.map(id=>position(v,id));
   const opening=positions.length?positions.reduce((a,b)=>a+b,0)/positions.length:0;
@@ -56,7 +57,7 @@
   // Neutral white garage lighting reveals the original material and car pixels.
   if(neutralGarage&&on)amount=0;
   const daylight=shared?opening:(positions.length?Math.max(...positions):0);
-  return {opacity:amount,on,electricOpacity:on&&!neutralGarage?(night?1:1-.8*daylight/100):0,opening,indirect:!!shared,sources:[...sources]};
+  return {opacity:amount,on,electricOpacity:on&&!neutralGarage?(night?1:1-(floor==='4'?.65:.8)*daylight/100):0,opening,indirect:!!shared,sources:[...sources]};
  }
  function beamOpacity(v,id,night){return position(v,id)/100*(night?.72:.38)}
  function beam(w){
