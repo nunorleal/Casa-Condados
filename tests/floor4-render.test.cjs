@@ -21,12 +21,14 @@ test('render atualiza opacidade inteira de dia e noite sem alterar a posição d
 
 test('render elétrico fornecido acompanha noite, abertura parcial e luzes independentes',()=>{
  const s=C.defaults();s.lights['4:studio']=true;
- assert.equal(R.levels(s,false).zones.studio.electric,0);
+ assert.equal(R.levels(s,false).zones.studio.electric,.35);
  assert.equal(R.levels(s,true).zones.studio.electric,1);
  s.blinds['studio-west']=0;assert.equal(R.levels(s,false).zones.studio.electric,1);
- s.blinds['studio-west']=50;assert.equal(R.levels(s,false).zones.studio.electric,.5);
+ s.blinds['studio-west']=50;assert.equal(R.levels(s,false).zones.studio.electric,.675);
  assert.equal(R.levels(s,true).zones.living2.electric,0);
  s.lights['4:studio']=false;assert.equal(R.levels(s,true).zones.studio.electric,0);
  assert.ok(R.markup().includes('assets/sotao-luz-eletrica-v1.jpg'));
  assert.match(R.markup(),/data-floor4-electric="studio"[^>]*><use href="#floor4-source-electric"/);
 });
+
+test('lights remain visible at every shutter opening, without changing the shutter itself',()=>{for(const id of ['studio','living2'])for(const opening of [0,25,50,75,100]){const s={lights:{['4:'+id]:true},blinds:{'studio-west':opening,'living2-west':opening}},l=R.levels(s,false);assert.ok(l.zones[id].electric>=.35);assert.equal(l.zones[id].natural,opening/100);assert.equal(C.lighting(s,'4',id,false).electricOpacity,l.zones[id].electric);s.lights['4:'+id]=false;assert.equal(R.levels(s,false).zones[id].electric,0)}});

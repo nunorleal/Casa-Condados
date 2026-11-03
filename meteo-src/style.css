@@ -1639,3 +1639,41 @@ html.red-night,html.red-night body{background:#000}
 @keyframes lunar-light-breathe{0%,100%{opacity:.88}50%{opacity:1}}
 
 /* WeatherIcon normalises each complete drawing into the same square, including rain. */
+
+/* Morning action stays above the focus-view dismissal overlay and respects safe areas. */
+.morning-blind-visible .brand{visibility:hidden}
+.morning-blind-control{position:fixed;top:max(12px,env(safe-area-inset-top));left:max(12px,env(safe-area-inset-left));z-index:40;width:clamp(142px,20vw,190px);color:#fff}
+.morning-blind-button{width:100%;min-height:86px;display:flex;align-items:center;justify-content:center;gap:8px;padding:14px 12px;background:#000;border:2px solid currentColor;border-radius:20px;color:inherit;cursor:pointer;touch-action:manipulation}
+.morning-blind-button span{display:flex;flex-direction:column;gap:5px;text-align:left}
+.morning-blind-button strong{font-size:16px}.morning-blind-button small{font-size:12px}
+.morning-blind-button:focus-visible{outline:3px solid currentColor;outline-offset:4px}
+.morning-blind-button:disabled{opacity:.55;cursor:default}
+.morning-blind-control p{font-size:12px;line-height:1.4;background:#000;padding:8px;border-radius:8px}
+
+@media(max-width:480px){
+ .morning-blind-control{width:154px}
+ .morning-blind-button{gap:6px;padding:12px 10px}
+ .morning-blind-button svg{width:24px;flex-shrink:0}
+ .morning-blind-button strong{font-size:14px;white-space:nowrap}
+ .morning-blind-button small{font-size:11px;white-space:nowrap}
+ .morning-blind-visible .hero{padding-top:58px}
+}
+
+/* Current artwork fills the temperature-to-high/low block; forecasts keep their sizes. */
+.hero .current-summary>.current-weather-symbol{width:min(var(--weather-reading-height,160px),42vw);height:var(--weather-reading-height,160px);flex-shrink:0;display:flex;align-items:center;justify-content:center}
+.hero .current-summary>.current-weather-symbol>.weather-icon{width:100%;height:100%;filter:drop-shadow(0 5px 12px #09253f30)}
+.red-night .hero .current-summary>.current-weather-symbol>.weather-icon{filter:grayscale(1) brightness(1.4)}
+
+/* Centre readings beneath the forecast temperature; solar times stay on the clock axis. */
+.hero .weather-reading{display:flex;flex-direction:column;align-items:center;text-align:center}
+.hero .weather-reading .temperature{justify-content:center}
+.hero .weather-reading .real-temperature{justify-content:center}
+.hero .sun-times{justify-content:center;margin-left:auto;margin-right:auto}
+
+/* Bedroom sensor: the existing parent cache, rendered by the Meteo clock. */
+.hero .bedroom-climate{width:100%;box-sizing:border-box;margin:20px auto 0;padding:17px 18px 13px;color:#fff;text-align:center;flex-shrink:0}
+.bedroom-climate-heading{display:flex;align-items:center;gap:12px;margin:0 5px 14px;text-align:left;font-size:17px}.bedroom-climate-heading>svg{width:28px;height:28px;flex-shrink:0}.bedroom-climate-heading strong{font-weight:650}.bedroom-climate-heading span{font-weight:400}.bedroom-climate-heading .bedroom-climate-source{width:22px;height:22px;margin-left:auto;color:#83cfff}
+.bedroom-climate-values{display:grid;grid-template-columns:1fr 1fr;gap:14px}.bedroom-climate-value{display:flex;align-items:center;justify-content:center;gap:15px;min-width:0;padding:17px 10px;background:#bed9ef19;border:1px solid #d2e6f333;border-radius:20px}.bedroom-climate-value>svg{width:34px;height:42px;flex-shrink:0;color:#8bd5ff}.bedroom-climate-value>div{display:flex;flex-direction:column;align-items:center;gap:5px;min-width:0}.bedroom-climate-value strong{font-size:clamp(25px,3.3vw,38px);line-height:1.1;font-weight:650;white-space:nowrap;font-variant-numeric:tabular-nums}.bedroom-climate-value span{font-size:13px;color:#d0dce6}.bedroom-climate-updated{font-size:11px;line-height:1.4;margin:12px 0 0;color:#e2edf5}.bedroom-climate[data-quality=last] .bedroom-climate-updated,.bedroom-climate[data-quality=unavailable] .bedroom-climate-updated{color:#ffe3b0}
+.focus-view .hero.has-bedroom-climate .clock{font-size:clamp(64px,min(26vw,20dvh),240px)}.focus-view .hero.has-bedroom-climate .temperature{font-size:clamp(52px,min(15vw,12dvh),130px)}.focus-view .hero .bedroom-climate{margin-top:1dvh;padding:12px 15px 10px}.focus-view .bedroom-climate-heading{margin-bottom:9px}.focus-view .bedroom-climate-value{padding:12px 9px}.focus-view .bedroom-climate-updated{margin-top:8px}
+.red-night .bedroom-climate-value{background:#000;border-color:#ffffff30}.red-night .bedroom-climate-value>svg,.red-night .bedroom-climate-source{color:#fff}
+@media(max-width:480px){.hero .bedroom-climate{padding:13px 11px 10px;border-radius:23px;margin-top:16px}.bedroom-climate-heading{gap:8px;font-size:13px;margin-bottom:10px}.bedroom-climate-heading>svg{width:23px;height:23px}.bedroom-climate-values{gap:9px}.bedroom-climate-value{gap:6px;padding:13px 5px;border-radius:16px}.bedroom-climate-value>svg{width:23px;height:33px}.bedroom-climate-value strong{font-size:24px}.bedroom-climate-value span{font-size:11px}.bedroom-climate-updated{font-size:10px}}

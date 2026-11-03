@@ -24,12 +24,26 @@
   const configured=!!snapshot?.configured,ready=!!(configured&&snapshot.fresh&&snapshot.online===true&&snapshot.calibrated===true&&Number.isFinite(snapshot.position)&&snapshot.position>=0&&snapshot.position<=100);
   return {configured,ready,open:ready&&snapshot.position===100,position:ready?snapshot.position:null};
  }
+ function morningBlindVisible({red=false,now,sunrise,sunset},blind){
+  return red===true&&Number.isFinite(now)&&Number.isFinite(sunrise)&&Number.isFinite(sunset)&&sunrise<sunset&&sunset-sunrise<86400000&&now>=sunrise&&now<sunset&&blind?.ready===true&&blind.position===0;
+ }
+ async function morningBlindAction(api,snapshot,context){
+  if(!api||api.isBusy()||api.hasUnsavedChanges()||!morningBlindVisible(context(),snapshot()))return false;
+  return await api.command('master','open')===true;
+ }
  function bedsideMode(previous,{enabled=false,night=false,red=false,blindOpen=false}){
   let holdNight=enabled&&!!(previous?.holdNight||night&&!previous?.baseNight),holdRed=enabled&&!!(previous?.holdRed||red&&!previous?.baseRed);
   if(blindOpen===true){holdNight=false;holdRed=false}
   return {baseNight:night,baseRed:red,holdNight,holdRed,night:night||red||holdNight||holdRed,red:red||holdRed};
  }
  function realTemperature(binding,reading,now=Date.now()){const configured=!!binding,value=reading?.temperature,temperature=configured&&typeof value==='number'&&Number.isFinite(value)&&value>=-100&&value<=150?value:null,fresh=temperature!==null&&reading.online&&!reading.error&&Number.isFinite(reading.fetchedAt)&&now>=reading.fetchedAt&&now-reading.fetchedAt<=120000;return {configured,temperature,status:!configured?'unconfigured':!reading?'pending':temperature===null?'unavailable':fresh?'current':'last'}}
+ function bedroomClimate(binding,reading,now=Date.now()){
+  const configured=!!binding,valid=(v,min,max)=>configured&&typeof v==='number'&&Number.isFinite(v)&&v>=min&&v<=max;
+  const temperature=valid(reading?.temperature,-100,150)?reading.temperature:null,humidity=valid(reading?.humidity,0,100)?reading.humidity:null;
+  const fetchedAt=configured&&Number.isFinite(reading?.fetchedAt)&&reading.fetchedAt>0&&reading.fetchedAt<=now?reading.fetchedAt:null;
+  const online=reading?.online===true||reading?.online===1,offline=configured&&!!reading&&(reading.online===false||reading.online===0),error=configured&&!!reading?.error,has=temperature!==null||humidity!==null,fresh=has&&online&&!error&&fetchedAt!==null&&now-fetchedAt<=120000;
+  return {configured,temperature,humidity,fetchedAt,offline,error,status:!configured?'unconfigured':!reading?'pending':!has?'unavailable':!fresh?'last':temperature===null||humidity===null?'partial':'current'};
+ }
  async function lampAction(s,settings){
   if(!s)return;
   const lamp=s.lampSnapshot('master');
@@ -38,5 +52,5 @@
   if(!lamp.ready||!lamp.state){await s.refresh({quiet:true});return}
   await s.commandLight('master',!lamp.state.on);
  }
- return {idle,preferences,lampAction,screensaver,realTemperature,redActive,bedroomBlind,bedsideMode};
+ return {idle,preferences,lampAction,screensaver,realTemperature,bedroomClimate,redActive,bedroomBlind,bedsideMode,morningBlindVisible,morningBlindAction};
 });

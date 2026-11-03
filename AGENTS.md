@@ -723,3 +723,154 @@ Igual à DomoticaNL V2 2.67: grupo weather-symbol dentro de WeatherIcon com esca
 # Dimensão visual uniforme na Meteo — 1.146
 
 Igual à DomoticaNL V2 2.69: normalizar os limites completos de cada WeatherIcon para 63 unidades, centradas em 40/35 no viewBox 80×70, incluindo precipitação. Substitui a escala CSS de 25% por transform calculado no componente. Preservar slots, grelhas, fases lunares, hemisfério, animações e opção noturna do estore. Fontes recompiladas em app-1.146.
+
+# Ação matinal e símbolos Meteo — 1.147
+
+Igual à DomoticaNL V2 2.70–2.72: botão Abrir estore visível apenas no vermelho, entre nascer/pôr do sol do dia exato e estore master-north real online/calibrado/fresco a 0%. Clique revalida visibilidade, horário, qualidade, busy e formulário sujo e envia só open por CasaCloudRead.commandBlind, na fila e confirmação existentes. Converter accepted:true em aceitação booleana para UI; nunca inferir posição nem repetir comando. Botão bloqueado durante envio/aceite e acima da camada de foco. Sem consultas/timers adicionais. Sol parcialmente nublado visível por deslocação da nuvem nos códigos diurnos 1/2. Símbolo principal acompanha altura de weather-reading por ResizeObserver com cleanup, viewBox justo e largura máxima 42vw; previsões mantêm dimensões. Preservar Lua, fases, animações, modo vermelho e opção de estore 100%. Testes/fixture apenas fictícios.
+
+# Zoom no badge Offline — 1.148
+
+Mesmo efeito da DomoticaNL V2 2.74: badge HTML completo aumenta até 115% com tremor horizontal de 1,5 px/rotação de 1 grau, regressando ao normal com repouso em ciclos de 2,8 s. Não esbater nem animar o contorno do equipamento. Badges SVG animam apenas o path do glifo para preservar transform de ancoragem. Pausar em Meteo visível e desativar com prefers-reduced-motion. Sem alterações a critérios offline, leituras, temporizadores JS ou comandos.
+
+# Offline sem badge — 1.149
+
+Regra visual comum autorizada nas duas casas: badge textual mantém zoom115%/tremor2,8s; máquinas sem rótulo Offline mostram o seu glifo a vermelho com o mesmo efeito. T2 usa kitchen-working-symbol e flag offline-symbol-alert derivada de rows offline confirmadas; sem acrescentar badge nos três atalhos da cozinha. Condados usa glifos SVG dishwasher/balcony existentes com data-shelly-offline da ligação atual. Não animar wrappers posicionados, imagem base, halos ou paredes; desativar animações normais de trabalho enquanto offline para não sugerir atividade. Recuperação retira aviso, preservando estado de funcionamento real. Pausar em Meteo e respeitar reduced-motion. Sem novas consultas, timers JS, comandos, configurações ou associações copiadas.
+
+Verificação1.149:5 testes direcionados aprovados, diff check concluído. Fixture local com IDs/credenciais fictícios e rede externa bloqueada confirma símbolo visível/vermelho e offline-label-alert2,8s, recuperação oculta o aviso; sem comandos e errosJS. Contornos e coordenadas estáticos. Prova review/condados-offline-symbol-1.149.jpg.
+
+# Textos centrados sob temperatura Meteo — 1.150
+
+Centrar weather-reading (temperatura, leitura Real, condição, sensação e máximas/mínimas) no seu próprio eixo vertical. Nascer/pôr do sol permanece fora deste bloco, centrado no relógio/ecrã. Aplicar também à vista ampliada e modo vermelho; preservar tamanhos, fases, animações e regras existentes. Só apresentação, sem consultas ou comandos.
+
+Verificação1.150: build concluído; fixture sem dispositivos, previsão16°C/sensor15,8°C. Medição1280×720 confirma centros de temperatura/condição/Real iguais737,49px e horários solares/relógio640px. Prova review/meteo-textos-centrados-1.150.jpg. Sem lógica de dispositivos alterada.
+
+# Versão MeteoNL comum às duas apps — 2.76
+
+Por pedido explícito, MeteoNL tem versão2.76 nas duas casas e passa a evoluir em conjunto (2.77,etc.), independente de version.json da aplicação de domótica. Fonte canónica da versão Meteo: meteo-src/app-info.ts; build lê esse ficheiro, nunca a versão da casa. Sincronizar package.json, referências meteo/index.html e meteo.js (HTTP e file/srcdoc) e recompilar em cada projeto, sem copiar pontes/associações/configurações entre casas. Cache do script meteo.js da casa deve mudar quando necessário.
+
+Preferência persistente: aplicar alterações comuns compatíveis à Domótica NL e Casa Condados, adaptando cada implementação e preservando dispositivos, IDs, credenciais, regras e plantas. Testes apenas fictícios. As versões próprias da domótica continuam independentes.
+
+Verificação: builds de ambas as Meteo aprovados, referências HTTP/srcdoc apontam para app-2.76 e UI de ambas mostra2.76 com dados fictícios. Versões da domótica preservadas: T2 2.76, Condados1.150.
+
+# Vasco e Zeca na planta — 1.151
+
+Replicação autorizada do ensaio T2: mesmos gatos SVG vistos de cima e ciclos30s, brilho noturno dos olhos5s, opção Vasco e Zeca na planta na display-settings/check-row nativa. Adaptar grafo aos pisos3/4 (coordenadas das fotografias, não às áreas antigas dos banners); não copiar percursos, IDs, conta ou associações da Domótica NL. cats-core.js expõe grafos independentes por piso; cats.js monta via CasaAddons.mount, conserva estado efémero próprio de cada piso e pausa quando este não está visível. Não simular travessia de escadas, varanda ou garagem; só passagens interiores verificadas e sem móveis/paredes. Recorte interior impede pintar sobre a estrutura. Plantas base intactas e controlos acima, pointer-events:none.
+
+Reutilizar CasaEnvironment e CasaHome.snapshot, sem rede/consultas/comandos. Pausar RAF/animações em diálogos, Meteo e segundo plano; respeitar reduced-motion. Preferência casa-leal-show-cats-v1 opcional booleana showCats validada no backup; cópias antigas preservam-na. MeteoNL mantém2.76. Verificação:254 testes aprovados, percursos/obstáculos/backup; fixture tests/serve_cats_fixture.py usa apenas credenciais/IDs fictícios e interceta rede externa. UI confirma2 gatos em cada piso, montagem via addons, ocultação/check, modo noturno/olhos5s e zero errosJS. Provas review/vasco-zeca-check-1.151.jpg, review/vasco-zeca-piso3-1.151.jpg e review/vasco-zeca-piso4-noite-1.151.jpg.
+
+# Gatos sem duplicação entre pisos — 1.152
+
+Sortear uma única distribuição por sessão: um gato no piso 3 e o outro no piso 4, com possibilidade de trocar os nomes no sorteio. CasaCatsCore.distribute garante Vasco e Zeca únicos; cats.js mantém essa atribuição ao trocar pisos, abrir diálogos, mostrar/ocultar gatos e retomar a app. Cada piso monta apenas o gato atribuído e conserva o seu percurso efémero. Não voltar a criar os dois gatos em cada piso nem sortear ao navegar. Preservar desenhos, percursos, pausas e preferência; sem rede ou equipamentos. Meteo mantém a sua versão independente.
+
+Verificação1.152:5 testes aprovados. Navegação real na fixture confirmou Zeca apenas no piso3 e Vasco apenas no piso4; voltar ao piso3 manteve só Zeca. Sem comandos físicos.
+
+# Porta do estúdio retirada — 1.153
+
+Remover apenas a folha/soleira de vidro no vão entre estúdio e sala2. Quatro variantes geradas com imagegen a partir dos renders originais; aplicar em floor4-source-* apenas pelo clip x298/y622/w75/h75, com fusão vertical nas bordas nas coordenadas da fotografia 896×1190. Restantes píxeis continuam a usar os JPG originais, sem substituir plantas completas ou tocar em paredes, secretária, iluminação, gatos ou controlos. Recursos assets/sotao-sem-porta-{day,closed,electric,night}-v1.png. Prompt: retirar apenas a porta/soleira horizontal, prolongar parquet no vão, preservar limites e iluminação do original.
+
+# Passeios e ícones das preferências — 1.154
+
+Gatos escolhem destinos por exploração equilibrada, privilegiando pontos menos visitados e evitando regressar imediatamente ao anterior; novos pontos em espaços livres e circuitos alternativos no piso3 e sala2. Cada gato mantém a atribuição única do seu piso e usa passagens verificadas, sem atravessar móveis, paredes, varandas ou simular escadas. Preferências visuais: retirar apenas explicação Barra cheia e acrescentar SVG decorativo a cada check de display-settings, ordem ícone/texto/check; patinhas para gatos. Preservar labels, IDs, estados, persistência, slider no fim e controlos.
+
+Verificação1.154:6 testes aprovados, incluindo exploração de todos os destinos e desvio de obstáculos. Fixture confirmou nove linhas com SVG/span/input, ausência da frase e patinhas nos gatos. Sem comandos reais. Prova review/checks-icons-1.154.png.
+
+# Vista de consumo por divisão — 1.155
+
+Botão raio entre contador e pisos ativa modo temporário de leitura, aria-pressed e Escape. Apenas somar medições atuais online/válidas das saídas associadas à divisão, deduplicadas por identidade; excluir contador geral, sensores, demonstração, histórico e totalMeter EV. Incompletos mostram +? e Medição parcial; ausentes não são zero. Ocultar outros banners por CSS, fechar/bloquear popups e adiar protetor Meteo enquanto ativo; preferências/posições e campos não são reescritos. Desativar restaura a apresentação anterior. Sem comandos, novas consultas, credenciais, persistência do modo ou mistura de associações entre casas. Addon independente room-power-core/view/adapter/css, antes de Meteo.
+
+# Eixo comum da informação meteorológica — MeteoNL2.77
+
+Corrigir o alinhamento que text-align sozinho não resolve na temperatura display:flex: weather-reading passa a coluna flex com align-items:center; temperatura usa justify-content:center. Centrar temperatura principal, Real, condição, sensação e máximas/mínimas entre si; horários solares permanecem no eixo relógio/ecrã. Mesma alteração nas duas MeteoNL, incluindo foco e modo vermelho; sem alterar pontes, sensores, animações ou horários. Builds2.77 de ambas aprovados e referências HTTP/srcdoc/package sincronizadas. Na fixture isolada22°C/Real20,7°C, centros temperatura/condição/Real738,99px e relógio/solar640px em ambas. Prova review/meteo-eixo-centrado-2.77.jpg. Sem dispositivos reais.
+
+Verificação da vista: 263 testes da aplicação aprovados; seis testes específicos repetidos após ajuste final. Fixture fictícia confirma banners por piso, botão entre contador e layers, bloqueio de popups e reposição por clique/Escape; telefone375px verificado. Nenhum comando real nem consulta adicional por esta vista. Prova review/room-power.png.
+
+# Gatos e iluminação local — 1.157
+
+Cada gato continua único. Condados distribui Vasco/Zeca independentemente pelos pisos3/4: juntos num piso ou separados; mantém atribuição entre visitas rápidas e pode redistribuir ao entrar num piso após2–5min, sem teletransporte em cena. Não acrescentar gatos na garagem nem percursos de escadas. Escurecimento usa a mesma opacidade noturna/diurna e mistura elétrica da planta, na zona que contém a posição atual; transição suave existente, também com estores fechados de dia. Atualizações da planta renovam o brilho mesmo em movimento reduzido. T2 aplica só a iluminação, preservando o único piso habitável dos gatos. Sem rede, comandos ou alterações de dispositivos.
+
+Verificação: testes fictícios de distribuição/unicidade, percursos sem obstáculos e brilho da iluminação aprovados. Fixture Condados confirma Vasco/Zeca no mesmo piso, outro piso vazio e regresso sem duplicados; brilho diurno diferente em zonas claras/escuras e redução ao selecionar noite. T2 preserva os dois gatos no piso habitável com nova leitura contínua da iluminação. Nenhum equipamento real acionado.
+
+# Estores em lâminas — 1.158
+
+Copiar aspeto das barras da Domótica NL: espessura18 unidades, azul carregado95%, contorno claro e padrão SVG local com divisões a cada7 unidades. Orientar lâminas transversalmente à barra vertical/horizontal; conservar posição centrada nos mesmos vãos, alvos, estados e controlos. Barra cheia significa0% aberto, vazia100%; dados antigos mantêm âmbar (também com lâminas) e desconhecidos sem preenchimento inventado. Animação só visual, respeitando movimento reduzido. Sem mudar caixilharias, renders, associações, leituras ou comandos.
+
+Verificação1.158: quatro testes de barras aprovados e sintaxe home.js válida. Fixture ?slats confirma posições0/40/50/75/100, lâminas horizontais/verticais nos pisos3/4, padrão SVG resolvido e zero comandos fictícios. Prova review/estores-laminas-1.158.png.
+
+# Passagem dos gatos Hall/Entrada — 1.159
+
+A máscara de iluminação tem um intervalo y557..565 no vão Hall/Entrada do piso3 que recortava os gatos como uma barra sobre o corpo. Acrescentar exclusivamente ao clip dos gatos a passagem x548/y550/w44/h24 nas coordenadas originais da fotografia. Preservar máscaras de iluminação, renders, chão, paredes e trajetos; sem elevar gatos sobre paredes ou remover toda a contenção. PASSAGES em cats-core, inserida como retângulo no clip cats-interior-clip; nenhum dispositivo ou comando alterado.
+
+Verificação1.159: sete testes dos gatos aprovados, incluindo cobertura do corpo no intervalo da porta e exclusão das ombreiras. Fixture ?slats&cats=3&passage coloca poses fictícias no vão e confirma o corpo completo, sem erroJS e sem comandos; captura review/gatos-passagem-1.159.png.
+
+# Lista de consumos e escala — 1.160
+
+Banners da vista raio mostram exclusivamente W/kW e indicação +? quando parcial; nome/qualidade só em título e nome acessível. Agora são botões: popup exclusivo room-power-dialog é a exceção permitida ao bloqueio dos restantes diálogos nesta vista. Lista apenas medidores positivos, atuais e deduplicados da divisão; reter linhas já apresentadas até fechar para voltar a ligar depois de0W, sem inventar leituras antigas. Atualização da lista lê cache, sem novo transporte ou consultas. Controlos usam on/off booleano reportado e APIs individuais existentes, guardas de frescura/configuração/pendente/fila; sem inferir alimentação dos watts, otimismo, retry ou comandos ao abrir. Estores, sensores de disparo e medidores sem atuação continuam só leitura. Escape fecha primeiro a lista; novo Escape sai da vista. Slider escala a dimensão visível usada na contenção dos banners.
+Usar CasaBannerSize existente. Incluir room-power-banner na exclusão de captura de gestos de plan-view; manter restante zoom/swipe. Metadados de nomes/papéis vêm das mesmas associações e respostas roomPowerSnapshot.
+
+Verificação: 267 testes aprovados. Fixtures fictícias confirmam abrir por toque/teclado, desligar/confirmar0W/manter linha/voltar a ligar, escala100→160%, popup compacto em375px e bloqueio de outros popups. Sem equipamentos reais. Prova review/condados-consumos-lista-1.160.png.
+
+# Escadas do piso4 fornecidas — 1.162
+
+Aplicar só a parte das escadas da divisão inferior do render sótão.png fornecido em3/11. Não usar os ensaios imagegen anteriores. Addon floor4-stairs.js recorta a mesma imagem em todos os ambientes: só filtro muda, nunca posição/tamanho/parede. Recorte restrito ao vão atual; preservar todos os JPG originais e a correção da porta. ENABLED=false reverte; cópia do renderer anterior e hashes em review. Ver ESCADAS-PISO4.md. Não replicar esta geometria para a outra casa.
+
+# Gatos como obstáculos mútuos — 2026-11-03
+
+CasaCatsTraffic reserva os percursos completos antes de cada passeio, com distância conservadora84unidades para incluir corpo/cabeça/cauda animada/rotação e folga. Verificar distâncias entre segmentos, incluindo cruzamentos e sentidos opostos, e distância ao outro gato parado. Se houver conflito, escolher outro destino seguro do grafo existente ou esperar e reavaliar no RAF local (cooldown1s em memória). Nunca deslocar lateralmente para fora de passagens ou alterar as plantas. A espera pausa as patas; não inferir tráfego de outro piso. Preservar ciclos30s quando livres, pausas, exploração equilibrada, distribuição única entre pisos e brilho da iluminação. Sem consultas/comandos/timers Cloud, IDs ou preferências novas. Montar cats-traffic-core antes de cats.js; estado é só efémero.
+
+Testes fictícios: travessias de segmentos/head-on, obstáculos parados e20min por cenário em8 sementes para cada planta/piso, distância mínima preservada, exploração e regresso a piso sem bloqueio permanente. Fixture confirma módulo montado, gatos em movimento e zero errosJS/comandos físicos. Captura review/gatos-obstaculos-mutuos.jpg.
+
+Verificação1.162: nove testes aprovados, incluindo igualdade integral do markup anterior após retirar só os quatro inserts, hash inalterado dos JPG e cópia exata do render fornecido. Fixture fictícia confirmou escada diurna/noturna, recortes idênticos nos quatro ambientes, sem errosJS e zero comandos. Provas review/escadas-fornecidas-1.162-dia.png e review/escadas-fornecidas-1.162-noite.png.
+
+# Luz das escadas do sótão — 1.163
+
+stairs4 acompanha rigorosamente living2 no render e CasaHomeCore.lighting: mesma abertura do estore e luz elétrica. Ignorar a luz independente legada4:stairs4 para a apresentação; não migrar configurações nem atuar. Preservar recorte fornecido, geometria e paredes. Teste cobre dia/noite,0/25/50/100%, luz ligada/apagada e valor legado contrário.
+
+Verificação1.163:17 testes aprovados. Fixture stairs-light mantém o valor legado das escadas ligado e a Sala2 apagada, confirma ambas as camadas elétricas0 com estore0%, e ambas1 ao ligar só a luz simulada da Sala2. Recorte/posição/paredes preservados; zero comandos Cloud. Provas review/escadas-luz-1.163-apagada.png e review/escadas-luz-1.163-ligada.png.
+
+# Luzes com estore aberto no sótão — 1.164
+
+Quando a luz de studio/living2 está ligada, manter contribuição elétrica mínima35% de dia com estore100% aberto, aumentando até100% com estore fechado; de noite100%. CasaHomeCore.lighting e floor4-render.levels usam a mesma regra. stairs4 continua a seguir living2. Luz apagada0%, sem alterar posições de estores, paredes ou recortes. Regra específica do sótão, preservar restantes pisos.
+
+Verificação1.164:28 testes aprovados. Fixture confirmou luz da Sala2 ligada com estore100% aberto e camadas elétricas living2/stairs4 em0.35, focos visíveis e zero comandos Cloud. Prova review/luzes-estore-aberto-1.164.png.
+
+# Banner interior do quarto — MeteoNL2.78
+
+Banner glass inferior na hero, sob horários solares, com Quarto · Ambiente interior, temperatura/humidade lado a lado e idade da última consulta Cloud. Usar BedDouble/Thermometer/Droplets/Cloud, sem afirmar Bluetooth sem conhecer transporte. CasaMeteoBridge.bedroomClimate lê exclusivamente sensor master existente: CasaShelly.sensorBinding/sensorReading no T2, CasaCloudRead.temperatureSnapshot(master) na Casa Condados. Preservar Real exterior/varanda e restantes pontes. Snapshot normalizado sem IDs/segredos, temperatura/humidade independentes válidas (zero incluído), pending/partial/unavailable/last/offline distintos; leitura antiga não é atual e falta não é zero. Esconder se não associado. fetchedAt representa consulta, nunca medição, por isso legenda Última consulta.
+
+BedroomClimate renderiza com relógio React existente, sem novo timer/polling/refresh/comando. Visível no modo ampliado e vermelho, com ajuste de tamanhos para encaixar o banner sem sobreposição. Vermelho mantém fundo preto. Versão Meteo2.78 comum, fontes/bundles/referências HTTP/srcdoc/package coerentes; preservar versões próprias e alterações das casas. Tests/meteo-bedroom verifica qualidade, valores, ausência de segredos e leitura exclusiva master sem transporte. Fixture isolada confirmou21,5°C/54%, última consulta1min, antiga10min, modo vermelho e modo ampliado375×812 (banner y584..733). Provas review/meteo-quarto-2.78.jpg e review/meteo-quarto-vermelho-2.78.jpg. Sem equipamentos reais.
+
+# Temporizador dos aparelhos — 1.165
+
+Opção extra Ligar 10 min/Ligar 15 min no popup do termoventilador/desumidificador, preservando ligar/desligar normal. Enviar on:true e toggle_after:600/900 no mesmo set/switch Cloud v2, documentado em https://shelly-api-docs.shelly.cloud/cloud-control-api/communication-v2/#control-a-switch. Temporizador nativo, sem setTimeout de desligamento no navegador, novas leituras ou repetição automática. Nova duração reinicia o tempo. Validar duração antes da fila e no transporte, preservar guardas de estado recente, pending, formulário sujo e confirmação por leitura; HTTP aceite não confirma estado físico nem execução do temporizador. Não alterar configurações, IDs, canais, credenciais ou MeteoNL. Testes exclusivamente fictícios.
+
+# Gatos seguem a iluminação da planta — 1.167
+
+CasaCats usa os levels do render do piso e a divisão geométrica da posição atual, incluindo o gradiente cozinha/sala. Pelo, riscas, focinho, contorno e olhos recebem cores escurecidas diretamente, sem depender de filtro CSS brightness sobre grupos SVG. Transição suave de 0,4 s; respeitar movimento reduzido. Leituras visuais existentes, sem consultas nem comandos novos. Fixture confirmou Zeca na Sala2 com brilho0,160 apagada e0,950 ligada, enquanto Vasco no Estúdio manteve0,832. 28 testes aprovados, zero comandos reais.
+
+Verificação: suite local aprovada com fixtures, transporte valida 600/900s e mantém comando normal sem duração; rejeita valores inválidos e cancela estado alterado antes da fila, sem repetição de comandos. Popups dos dois aparelhos verificados na UI com IDs/chaves fictícios: pedido de 10/15min leva toggle_after no mesmo set/switch; estado só muda após leitura, desligar normal envia on:false sem timer. Captura review/appliance-timer.jpg. Temporizador físico não testado em equipamentos reais.
+
+# Banner interior alinhado — MeteoNL2.79
+
+Por pedido do utilizador, banner do quarto ocupa100% da largura da hero e reutiliza o fundo, borda, sombra e transparência da classe glass comum aos painéis inferiores, sem gradiente próprio opaco. Retirar a frase Última consulta e a contagem de idade da apresentação; preservar avisos de dados antigos/offline/parciais, validação e frescura. Trocar nuvem por Bluetooth, com nome acessível que esclarece sensor Bluetooth/leitura Shelly Cloud. Sem alterar pontes, IDs, transporte, polling ou comandos. Aplicar nas duas apps, build2.79 e cache sincronizados.
+
+Verificação2.79: build aprovado, testes Meteo existentes aprovados e fixture sem dispositivos confirma banner/painel inferior ambos x282/largura716px, background e backdrop-filter calculados idênticos, símbolo lucide-bluetooth presente e ausência da frase Última consulta. Captura review/meteo-banner-2.79.jpg. Apenas apresentação alterada.
+
+# Olhos dos gatos e identificação da divisão — 1.169
+
+No escuro, olhos verde claros independentes das cores escurecidas do corpo, com pulsação/piscadela em scaleY e opacidade a cada4,8s; Zeca desfasada1,7s. Sem animação de brilho em divisões claras. Movimento reduzido mantém olhos estáticos discretos; pausas existentes preservadas. T2 passa a paleta direta por cor, sem filtro brightness no grupo inteiro.
+
+A deteção geométrica usa rectFits com alvo1×1:0,1×0,1 era inferior à tolerância de área0,1 e aceitava uma divisão errada. Preservar fallback do percurso nos vãos. UI T2 confirmou brilho corporal0,220 em master/living apagados e1,000 em hall/kitchen iluminados, animação cat-eye-blink só no escuro. Condados confirmou0,160 e olhos animados em living2 apagada e0,832 sem brilho em studio iluminado. 26 testes dos gatos/tráfego nas duas apps aprovados; fixtures intercetam todos os pedidos, sem equipamentos reais.
+
+# Temporizador por pressão prolongada — 1.171
+
+Substituir painel sempre visível por cronómetro pequeno no botão normal de alimentação. Clique curto preserva ligar/desligar; pressão550ms rato/toque apenas abre escolhas5/10/15min e Personalizado1..1440min inteiros. Suprimir clique sintético após pressão longa; cancelar gesto com deslocação>10px, pointercancel, perda de captura, blur, diálogo fechado ou app oculta. Teclado seta abaixo/ShiftF10 abre opções; Escape fecha. Abrir opções nunca envia comandos. Escolha explícita liga on:true/toggle_after:segundos no mesmo comando nativo, sem timer de desligamento do navegador. Validar inteiro60..86400 múltiplo60 antes da fila e transporte; mesmas guardas dirty/fresco/pending e confirmação existente. Preservar estados normais e configurações; testes só fictícios.
+
+# Pressão prolongada nos estores — 1.170
+
+blind-drag-core/js/css partilhados nas duas apps: manter450ms no alvo do estore ou banner e arrastar verticalmente escolhe percentagem inteira0..100. Subir aumenta abertura, descer diminui; apenas a cápsula mostra pré-visualização. Clique curto/teclado preservam popup. Só pointerup envia uma posição explícita pelo comando existente; sem comandos em input/move, sem retry ou posição otimista. Demo aplica só ao largar, preservando seguidores/manuais nos Condados.
+
+Snapshot inicial e final exigem estado controlável/posição válida; geração de configuração deve coincidir. Offline/stale/pendente/configuração suja sem controlo. Escape, pointercancel, perda de captura, blur, documento oculto, segundo ponteiro e popup aberto cancelam. Movimento antes de450ms cancela gesto. Captura de documento e touch-action:none nos alvos impedem swipe/pan/drag concorrente; suprimir clique residual só após hold/movimento. Não alterar os controlos de popup, imagens ou associações.
+
+36 testes de estores aprovados nas duas apps; relógio/DOM fictícios garantem zero comandos na pré-visualização/cancelamento/estado alterado e um único ao largar. UI fictícia confirmou Condados40→60, T2demo0→20 e T2Cloud50→70 com um set/cover e confirmação por leitura. Escape em pré-visualização90 preservou70 e contador de comandos1. Cliques curtos abrem ambos os popups. Fixtures intercetam pedidos com IDs/chaves fictícios; nenhum equipamento real usado.
+
+Verificação: suites279 testes T2/296 Condados aprovadas e testes dirigidos11/17 após ajuste final. UI com fixtures fictícias confirmou pressão750ms nos dois projetos abre opções sem qualquer comando;5min envia toggle_after300, personalizado23min envia1380, zero bloqueado pelo formulário sem envio; clique normal posterior envia on:false sem duração. Teclado ArrowDown abre opções sem comando e fechar devolve foco, painel oculto por omissão. Leitura temporariamente ocupada só desativa escolhas, nunca apaga duração em edição; fechar permanece disponível. Capturas review/appliance-timer-longpress.jpg e T2 review/appliance-timer-compact.jpg. Nenhum aparelho real testado.
