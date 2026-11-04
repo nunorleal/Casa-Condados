@@ -6,7 +6,15 @@
  function layout(p,plans){if(!p||typeof p!=='object'||Array.isArray(p)||Object.keys(p).some(k=>!['floor','room','x','y'].includes(k))||!fits(p,plans))throw Error('Coloque o termoventilador dentro de uma divisão.');return {floor:p.floor,room:p.room,x:p.x,y:p.y}}
  function locate(floor,p,plans){for(const r of [...(plans[floor]?.rooms||[])].reverse()){const candidate={floor,room:r.id,x:p.x,y:p.y};if(fits(candidate,plans))return candidate}return null}
  function destination(floor,room,plans){const r=plans[floor]?.rooms.find(r=>r.id===room);if(!r)throw Error('Divisão inválida.');const p=G.nearestFit(G.polygons(r.area),r,SIZE.width,SIZE.height);if(!p)throw Error('Não existe espaço para colocar o termoventilador nesta divisão.');return {floor,room,x:p.x,y:p.y}}
+ function stairDestination(floor,p,plans,size=SIZE){
+  const link={'3':{source:'stairs3',floor:'4',room:'stairs4'},'4':{source:'stairs4',floor:'3',room:'stairs3'}}[floor];
+  if(!link||!p||!Number.isFinite(p.x)||!Number.isFinite(p.y))return null;
+  const source=plans[floor]?.rooms.find(r=>r.id===link.source),target=plans[link.floor]?.rooms.find(r=>r.id===link.room);
+  if(!source||!target||!G.rectFits(G.polygons(source.area),p,1,1))return null;
+  const point=G.nearestFit(G.polygons(target.area),target,size.width,size.height);
+  return point?{floor:link.floor,room:link.room,x:point.x,y:point.y}:null;
+ }
  function status(d,b){const s=d?.status||{},i=b.channel,choices=[['switch',s['switch:'+i]],['pm1',s['pm1:'+i]],['meters',s.meters?.[i]],['emeters',s.emeters?.[i]]].filter(([,c])=>c&&typeof c==='object'),[family,c]=choices.length===1?choices[0]:[],valid=!!c&&!d?.error&&s.is_valid!==false&&c.is_valid!==false&&!s.errors?.length&&!c.errors?.length&&!s.overpower&&!c.overpower&&!s.overtemperature&&!c.overtemperature;const raw=valid?(Object.hasOwn(c,'apower')?c.apower:c.power):null,total=valid?(family==='switch'||family==='pm1'?c.aenergy?.total:c.total):null,number=v=>typeof v==='number'&&Number.isFinite(v)&&v>=0;return {relay:E.relayStatus(d,i),powerWatts:number(raw)?raw:null,energyKWh:number(total)?total/(family==='meters'?60000:1000):null,online:d?.online===true||d?.online===1,hasMeter:!!c}}
  function fresh(r,now=Date.now()){return !!(r?.online&&r.valid&&r.hasOutput&&!r.error&&!r.missing&&!r.errors?.length&&typeof r.on==='boolean'&&Number.isFinite(r.fetchedAt)&&now>=r.fetchedAt&&now-r.fetchedAt<=45000)}
- return {SIZE,DEFAULT,config,layout,fits,locate,destination,status,fresh};
+ return {SIZE,DEFAULT,config,layout,fits,locate,destination,stairDestination,status,fresh};
 });

@@ -6,5 +6,5 @@
  function layout(p,plans){if(!p||typeof p!=='object'||Array.isArray(p)||Object.keys(p).some(k=>!['floor','room','x','y'].includes(k))||!fits(p,plans))throw Error('Coloque o desumidificador dentro de uma divisão.');return {floor:p.floor,room:p.room,x:p.x,y:p.y}}
  function locate(floor,p,plans){for(const r of [...(plans[floor]?.rooms||[])].reverse()){const candidate={floor,room:r.id,x:p.x,y:p.y};if(fits(candidate,plans))return candidate}return null}
  function destination(floor,room,plans){const r=plans[floor]?.rooms.find(r=>r.id===room);if(!r)throw Error('Divisão inválida.');const p=G.nearestFit(G.polygons(r.area),r,SIZE.width,SIZE.height);if(!p)throw Error('Não existe espaço para colocar o desumidificador nesta divisão.');return {floor,room,x:p.x,y:p.y}}
- return {SIZE,DEFAULT,config,layout,fits,locate,destination,status:Portable.status,fresh:Portable.fresh};
+ return {SIZE,DEFAULT,config,layout,fits,locate,destination,stairDestination:(floor,p,plans)=>Portable.stairDestination(floor,p,plans,SIZE),status:Portable.status,fresh:Portable.fresh};
 });

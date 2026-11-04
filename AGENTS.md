@@ -922,3 +922,55 @@ Verificação2.80: builds de ambas aprovados, suites completas290 T2/308 Condado
 # Historico de energia retirado - 1.182
 
 Por pedido do utilizador, foram retirados os graficos locais, a importacao/exportacao CSV e os modulos energy-history. Manter o contador atual e os controlos anteriores. Nao acrescentar descargas de historico, polling extra ou testes no Shelly real. O CSV privado no Ambiente de Trabalho e eventuais dados antigos do navegador nao foram apagados.
+
+# Contagem na linha Ligado — 1.183
+
+Nos popups de termoventilador/desumidificador, apresentar cronómetro e MM:SS (H:MM:SS acima de1h) na própria linha Ligado, sem novo bloco ou aumento do popup. Usar menor tempo entre limite da duração escolhida e restante nativo contado desde a consulta. Só se timerActive confirmado e on:true atual; leituras antigas/offline/erro ou comando normal removem contador. Relógio é só visual, nunca envia desligamento. Reutilizar draw visual existente a1s (T2 passa2s para1s); sem novos pedidos, IDs ou configurações. Condados revela a linha já existente apenas enquanto temporizador ativo; cabe na altura dos botões de alimentação. Manter só cronómetro pequeno âmbar e botão principal normal/verde.
+
+Verificação: suites297 T2/316 Condados aprovadas, incluindo descida30 para29 e ausência após expiração/erro/offline. Fixture nativa fictícia mostra Ligado + cronómetro MM:SS em ambas; comparação com ligado normal confirma popup T2 430×488,59px e Condados360×417,81px, exatamente iguais com temporizador. Sem novos pedidos nem comandos pela contagem. Captura review/appliance-countdown.jpg.
+
+# Adicionar tempo sem desligar — 1.186
+
+Reproduzida falha de confirmação quando alimentação já era on:true: leitura seguinte com o mesmo Ligado mas sem timer fazia terminar a verificação cedo. Comando temporizado continua exatamente um on:true/toggle_after, sem off intermédio ou retry. Agora seleção guarda acceptedAt/awaiting e só confirma com leitura nova on:true e timer nativo ativo; mantém a verificação limitada existente enquanto faltar prova. Contador/âmbar só após confirmação; se prazo terminar sem timer, mensagem específica e remover seleção não confirmada. Ligar/desligar manual preservado. Testes só fictícios; utilizador não chegou a verificar se o aparelho real desligava, por isso não afirmar uma falha física demonstrada.
+
+Validação desta correção: 317 testes passaram, incluindo regressão de confirmação atrasada do temporizador com aparelho previamente ligado. No navegador, apenas com transporte e IDs fictícios, confirmado ON manual → ON com toggle_after=300, sem OFF intermédio; contador visível após confirmação nativa. Captura: review/appliance-manual-timer-confirmed.jpg. git diff --check sem erros. Nenhum dispositivo real consultado ou comandado.
+
+# Recuperar temporizador após fechar — 1.187
+
+Por pedido do utilizador, a referência explícita de duração passa a persistir localmente em casa-leal-appliance-timers-v1. Apenas associação servidor/ID/canal e acceptedAt/until; nunca chave, configuração, backup ou comando. Restaurar apenas na mesma associação e antes do prazo original. A seleção recuperada continua dependente de leitura atual on:true/timerActive nativo, sem reiniciar/prolongar/enviar comandos ou consultas adicionais. Temporizador nativo sem referência explícita continua sem contador/âmbar. Comando normal aceite ou confirmação expirada remove referência. Armazenamento bloqueado mantém funcionamento em memória. Esta regra substitui a indicação anterior de seleção só efémera. Testar exclusivamente com IDs fictícios.
+
+Validação: 320 testes aprovados, incluindo reabertura de ambos os aparelhos, tempo decrescente, associação/canal/servidor diferente, expiração, armazenamento bloqueado, leitura ausente/offline e zero comandos ao recuperar. git diff --check sem erros. Ensaio visual T2 fictício recuperou 04:18 após recarregar, contador de comandos vazio na nova página; prova review/appliance-timer-reopened.jpg. Nenhum equipamento real consultado/comandado.
+
+# Reabertura com campos de temporizador ausentes — 1.188
+
+Utilizador confirmou falha na1.187. Referência persistida recuperada pode fornecer contagem prevista (≈ e nome acessível Tempo restante previsto) somente com ON atual, leitura fresca/online e ausência dos campos nativos (undefined). Prazo original, mesma associação, nenhuma repetição/extensão/comando. timerActive e âmbar continuam a exigir prova nativa; timerEstimated é distinto. OFF, nativo explicitamente false/zero, offline, antigo, erro ou prazo esgotado ocultam. Referência não restaurada/sem escolha explícita nunca gera estimativa. Causa concreta no aparelho do utilizador ainda não confirmada; testes simulam a resposta incompleta separadamente da resposta nativa completa.
+
+Validação: 320 testes aprovados, incluindo recuperação sem campos nativos (previsão), retorno à prova nativa, timer explicitamente inativo e zero comandos de recuperação. Ensaio visual Casa Condados: temporizador fictício10min, fechar aba, nova aba sem campos de timer mas ON atual, contador ≈09:16 visível e nenhum novo comando. Captura nos Condados review/appliance-timer-reopened-estimate.jpg. Nenhum aparelho real usado. git diff --check sem erros.
+
+# Cronómetro na planta — 1.190
+
+Badge pequeno no canto inferior direito do termoventilador/desumidificador: cronómetro+tempo restante, preservando auréola verde/hover/clique/arrasto. Montado no botão exterior, fora do render diurno/noturno. Sem interação própria (pointer-events:none), sem novos timers/consultas/comandos; draw1s existente atualiza com o mesmo snapshot do popup. Só ON atual com temporizador confirmado ou previsão recuperada (≈ e tom distinto). Manual, expirado, desconhecido/offline ocultam. Mesma apresentação nas duas apps.
+
+Validação: 325 testes existentes aprovados. Ensaio UI fictício confirmou cronómetro e tempo no canto inferior direito na planta T2/Duplex, clique do próprio aparelho abre popup, desumidificador Duplex mostra04:29 e desligar normal T2 oculta badge. draw existente atualiza, nenhum transporte/intervalo novo. Captura review/appliance-plan-timer.jpg. git diff --check válido; nenhum aparelho real usado.
+
+# Contador acima do aparelho — 1.192
+
+Por pedido do utilizador, cápsula do temporizador passa para cima do dispositivo à direita, ao estilo do badge Offline (top−21px, móvel−18px, padding e altura compactos). Preservar cores próprias do temporizador/previsão, sem animação de alarme. Apenas CSS/versão; contagem, dados, controlos e auréola intactos.
+
+Verificação: CSS do contador idêntico nas duas apps, diff sem erros. UI Duplex fictícia confirmou cápsula04:26 acima do aparelho (top−21px), verde preservado. Sem alterações de lógica/consultas/comandos. Prova nos Condados: review/appliance-plan-timer-above.jpg.
+
+# Contador centrado — 1.195
+
+Centrar cápsula do contador em left50%/translateX−50%, bottom calc(100% +3px), sem deslocamento lateral. Mesma regra móvel e desktop, altura variável não afeta folga. Só apresentação; manter lógica e auréola.
+
+Verificação fictícia: erro entre centros inferior a0,01px e distância vertical3px na Duplex; regra CSS idêntica nas duas apps. Nenhuma mudança de lógica/consulta/comando. Diff sem erros. Prova nos Condados review/appliance-plan-timer-centered.jpg.
+
+# Distância do contador — 1.196
+
+Por pedido do utilizador, distância entre cápsula do contador e ícone reduzida de3px para1px (bottom calc(100% +1px)). Centramento e restantes regras preservados. Alteração só CSS; sem consultas/comandos.
+
+# Distância visual do contador — 1.197
+
+Correção: a caixa inclui PNG transparente. Alpha128 mínimo dia/noite medido em y272/1254 para termoventilador e183/1254 para desumidificador; mesmos assets nas duas apps. Âncora bottom78,30941%/85,40670% +2px desconta margem transparente, reservando1px do contorno verde sólido e1px de separação visual. Preservar centro, recursos, lógica, consultas e controlos. Não afirmar que a distância anterior à caixa correspondia ao aparelho visível.
+
+Validação fictícia da geometria: distância calculada até ao alpha128 da imagem, descontando contorno verde sólido1px, foi0,9875px; erro de centro<0,01px. Assets iguais e CSS comum nas duas apps. Captura Duplex review/appliance-plan-timer-visible-gap.jpg. Nenhum dispositivo real usado.
