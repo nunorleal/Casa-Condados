@@ -66,3 +66,11 @@ body[data-period=night] #plan-canvas svg>g>:not(.white-walls){filter:none}
 
 /* Display preferences: icon, readable label, then the existing checkbox. */
 dialog .display-settings .check-row{display:grid;grid-template-columns:20px minmax(0,1fr) 24px;column-gap:10px} .setting-check-icon{display:block;width:19px;height:19px;color:#63849c;pointer-events:none}dialog .display-settings .check-row>span{min-width:0}
+
+/* Native HTML controls share the same hit geometry as the SVG bars. */
+#blind-window-controls{position:absolute;inset:0;pointer-events:none;overflow:hidden;z-index:1}
+#blind-banners{z-index:2}
+#blind-window-controls .blind-window-trigger{position:absolute;display:block;appearance:none;-webkit-appearance:none;border:0;padding:0;margin:0;min-width:0;min-height:0;background:transparent;box-shadow:none;border-radius:0;pointer-events:auto;touch-action:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;cursor:pointer;transform:none;outline:none}
+#blind-window-controls .blind-window-trigger[hidden]{display:none}
+.blind-window.window-hover .blind-highlight{opacity:1;fill:#4bafff33}
+body.room-power-mode #blind-window-controls{visibility:hidden!important;pointer-events:none}

@@ -9,3 +9,11 @@ test('stairs follow the lower room blinds and electric light, ignoring legacy in
 
 test('stairs darken using native SVG paint, independent of CSS filters on reused SVG sources',()=>{for(const [kind,opacity]of Object.entries(S.SHADE)){const markup=S.markup(kind);assert.ok(!markup.includes('style="filter:'));assert.ok(markup.includes('fill="black" opacity="'+opacity+'"'));assert.ok(markup.indexOf('<rect')>markup.indexOf('<image'))}assert.equal(S.SHADE.closed,.84);assert.equal(S.SHADE.day,0)});
 test('the lighting boundary follows the bottom of the partition wall',()=>{for(const x of [150,400]){assert.equal(R.regionAt(x,650),'studio');assert.equal(R.regionAt(x,674),'studio');assert.equal(R.regionAt(x,676),'living2')}assert.equal(R.OUTLINE,'M51 10H431V638H858V1164L853 1178H55L51 1164Z')});
+
+ test('moonlight cools only the night crop while preserving luminance detail, opacity and geometry',()=>{
+ const night=S.markup('night');assert.ok(night.includes('filter="url(#floor4-stair-moonlight)"'));assert.ok(night.includes('color-interpolation-filters="sRGB"'));assert.ok(night.includes('fill="black" opacity="0.72"'));
+ for(const kind of ['closed','day','electric'])assert.ok(!S.markup(kind).includes('moonlight'));
+ const apply=rgb=>[0,1,2].map(row=>rgb.reduce((n,c,i)=>n+c*S.MOONLIGHT[row*5+i],0));
+ for(const rgb of [[.7,.4,.2],[.3,.2,.1],[.9,.8,.6]]){const [r,g,b]=apply(rgb);assert.ok(b>g&&g>r)}
+ assert.ok(apply([.7,.4,.2])[1]>apply([.3,.2,.1])[1]);assert.equal(S.MOONLIGHT[18],1);
+ });

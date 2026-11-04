@@ -9,11 +9,22 @@
   return {missing:!device,online:device?.online===1||device?.online===true,hasMeter:!!c,valid,powerKW:p===null?null:p/1000,reactiveKVAR:q===null?null:q/1000,apparentKVA:p===null||q===null?null:Math.hypot(p,q)/1000,voltage:voltage!==null&&voltage>0?voltage:null,energyKWh:total!==null&&total>=0?total/1000:null};
  }
  // The Shelly EM has one supply relay, index 0, independent of its two clamps.
+ function relayTimer(c,s){
+  if(!c||!['has_timer','timer_remaining','timer_duration','timer_started_at','timer_started'].some(k=>Object.hasOwn(c,k)))return {};
+  const number=v=>typeof v==='number'&&Number.isFinite(v),stop={timerActive:false,timerSeconds:0};
+  if(c.has_timer===false)return stop;
+  let remaining=null;
+  if(Object.hasOwn(c,'timer_remaining')){if(!number(c.timer_remaining)||c.timer_remaining<0)return stop;remaining=c.timer_remaining}
+  else{const start=c.timer_started_at??c.timer_started,clock=s.sys?.unixtime??s.unixtime??Date.now()/1000;
+   if(number(start)&&start>0&&number(c.timer_duration)&&c.timer_duration>0&&number(clock)&&clock>=start)remaining=Math.max(0,start+c.timer_duration-clock);
+  }
+  return {timerActive:remaining!==null?remaining>0:c.has_timer===true,timerSeconds:remaining};
+ }
  function relayStatus(device,channel=0){
   const s=device?.status||{},candidates=[s.relays?.[channel],s['switch:'+channel]].filter(c=>c&&typeof c==='object');
   const values=candidates.map(c=>typeof c.ison==='boolean'?c.ison:typeof c.output==='boolean'?c.output:null);
   const valid=!!device&&!device.error&&s.is_valid!==false&&!s.errors?.length&&!s.overtemperature&&!s.overpower&&!s.overvoltage&&candidates.length>0&&candidates.every(c=>c.is_valid!==false&&!(typeof c.ison==='boolean'&&typeof c.output==='boolean'&&c.ison!==c.output)&&!c.errors?.length&&!c.overtemperature&&!c.overpower&&!c.overvoltage)&&values.every(v=>typeof v==='boolean')&&values.every(v=>v===values[0]);
-  return {online:device?.online===true||device?.online===1,valid,on:valid?values[0]:null,hasOutput:candidates.length>0,missing:!device,errors:valid?[]:['invalid']};
+  return {...relayTimer(candidates.length===1?candidates[0]:null,s),online:device?.online===true||device?.online===1,valid,on:valid?values[0]:null,hasOutput:candidates.length>0,missing:!device,errors:valid?[]:['invalid']};
  }
  function state(c,r,now=Date.now()){const b=binding(c),limit=(c.homeEnergy||DEFAULT).contractKVA,fresh=!!(r?.online&&!r.error&&r.valid&&Number.isFinite(r.fetchedAt)&&now>=r.fetchedAt&&now-r.fetchedAt<=45000),power=fresh?r.powerKW:null,apparent=fresh?r.apparentKVA:null,ratio=apparent===null?null:apparent/limit;
   const lastReading=b&&r?.valid&&r.hasMeter&&Number.isFinite(r.fetchedAt)&&[r.powerKW,r.apparentKVA,r.energyKWh].some(Number.isFinite)?{powerKW:number(r.powerKW),apparentKVA:number(r.apparentKVA),energyKWh:number(r.energyKWh),voltage:number(r.voltage),fetchedAt:r.fetchedAt}:null;

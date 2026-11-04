@@ -11,3 +11,5 @@ Mudar apenas const ENABLED=true para const ENABLED=false em floor4-stairs.js. Is
 Desde1.163, as escadas acompanham a Sala2 no render e no normalizador de iluminação, incluindo luz elétrica e abertura do estore. O valor independente legado de4:stairs4 é ignorado visualmente; guardar/consultar não envia comandos.
 
 1.166: sombra preta SVG local por ambiente (84% fechado, 72% noturno, 12% elétrico e 0% diurno), sem filtro CSS em fontes reutilizadas por use. Recorte e imagem preservados. Limite entre divisões em y675, na base da parede; geometria OUTLINE intacta.
+
+1.174: apenas o recorte noturno das escadas recebe uma matriz SVG sRGB que converte a luminância da madeira para tom frio azulado. Mantém a sombra preta72%, geometria e textura originais. Dia, fechado e elétrico sem mudança de cor. A mistura por abertura/luz da Sala2 existente continua a controlar o resultado. 14 testes aprovados; fixture noturna com estore100% confirmou o tom frio e zero comandos Cloud. Prova review/escadas-azul-1.174.png.
