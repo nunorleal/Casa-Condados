@@ -98,7 +98,9 @@
   }
   base.append(hits);update();
  }
+ let pendingPortableUpdate=false;
  function update(){
+  if(window.CasaHeater?.isDragging()||window.CasaDehumidifier?.isDragging()){pendingPortableUpdate=true;return}pendingPortableUpdate=false;
   if(!current)return;const displayState=visualState(),{floor}=current,night=window.CasaEnvironment?.isDay()===false,solarDay=window.CasaEnvironment?.isSolarDay?.(),balconyDay=typeof solarDay==='boolean'?solarDay:!night,p=window.CasaPlans[floor];
   for(const room of p.rooms){
    const lighting=C.lighting(displayState,floor,room,room.id.startsWith('balcony')?!balconyDay:night),on=lighting.on;
@@ -187,6 +189,7 @@
  async function setAllLights(on){if(typeof on!=='boolean')throw new TypeError('Estado de luz inválido');const result={sent:0,simulated:0,skipped:0};for(const key of C.roomKeys(window.CasaPlans)){const [floor,room]=key.split(':'),s=lightInfo(floor,room);if(!s.configured){state.lights[key]=on;result.simulated++;continue}if(!s.canControl){result.skipped++;continue}try{await window.CasaCloudRead.commandLight(key,on);result.sent++}catch{result.skipped++}}remember();syncRoom();return result}
 
  async function setAllBlinds(value){if(value!==0&&value!==100)throw new TypeError('Posição de estores inválida');const result={sent:0,simulated:0,skipped:0};for(const w of C.WINDOWS){const s=blindInfo(w.id);if(!s.configured){followers.manual(w.id,visualState(),blindInfo);state.blinds[w.id]=value;result.simulated++;continue}if(!s.canControl){result.skipped++;continue}try{await window.CasaCloudRead.commandBlind(w.id,value===100?'open':'close');result.sent++}catch{result.skipped++}}remember();syncRoom();return result}
+ window.addEventListener('portabledragchange',()=>{if(pendingPortableUpdate&&!window.CasaHeater?.isDragging()&&!window.CasaDehumidifier?.isDragging())update()});
  window.addEventListener('roomnameschange',position);window.addEventListener('energychange',()=>{update();syncBlind();syncRoom()});window.addEventListener('environmentchange',update);
  // Resolve the visible bar in SVG coordinates as well as its HTML accessibility control.
  // Safari can target the plan underneath a transparent overlay; the same bar must still work.

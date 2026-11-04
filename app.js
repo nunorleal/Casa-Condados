@@ -70,6 +70,7 @@ function step(direction){if(blocked()||Date.now()-lastChange<700)return;const in
 stage.addEventListener('wheel',e=>{if(blocked()||Math.abs(e.deltaY)<18)return;e.preventDefault();step(e.deltaY>0?1:-1)},{passive:false});
 window.addEventListener('keydown',e=>{if(blocked()||/INPUT|SELECT|TEXTAREA/.test(e.target.tagName))return;if(e.key==='PageDown'){e.preventDefault();step(1)}if(e.key==='PageUp'){e.preventDefault();step(-1)}});
 window.addEventListener('roomnameschange',()=>{for(const b of $('room-labels').children)b.textContent=window.CasaRoomNames.get(current,b.dataset.room);positionLabels()});
+window.CasaFloors={show:showFloor,current:()=>current};
 window.CasaRooms={open:(floor,id)=>{const room=plans[floor]?.rooms.find(r=>r.id===id);if(room)openRoom(floor,room)}};
 window.CasaPlanView.configure({onChange:positionLabels,onSwipe:step});
 new ResizeObserver(()=>window.CasaPlanView.resize()).observe(stage);
