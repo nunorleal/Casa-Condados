@@ -25,6 +25,7 @@ class Fixture(SimpleHTTPRequestHandler):
   if 'passage' in parse_qs(urlparse(self.path).query,keep_blank_values=True):
    pose='<script>const fixtureFloor=CasaCatsCore.forFloor;CasaCatsCore.forFloor=f=>{const c=fixtureFloor(f);return f==="3"?{...c,sample:j=>({x:570,y:j.path[0].id==="master"?561:610,angle:180,room:"entrance",walking:false})}:c};</script>'
    page=re.sub(r'(<script src="cats\.js[^"\n]*"\s*></script>)',lambda m:pose+m.group(1),page)
+  if 'missedhit' in parse_qs(urlparse(self.path).query,keep_blank_values=True):page=page.replace('</head>','<style>#blind-window-controls .blind-window-trigger{pointer-events:none!important}</style></head>')
   if 'drag' in parse_qs(urlparse(self.path).query,keep_blank_values=True):page=page.replace('</body>','<script src="review/blind-drag-fixture.js"></script></body>')
   data=page.encode();self.send_response(200);self.send_header('Content-Type','text/html; charset=utf-8');self.send_header('Cache-Control','no-store');self.end_headers();self.wfile.write(data)
 if __name__=='__main__':ThreadingHTTPServer(('127.0.0.1',8116),lambda *a,**k:Fixture(*a,directory=str(ROOT),**k)).serve_forever()

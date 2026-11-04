@@ -15,3 +15,22 @@ test('popup de divisão inclui só as associações dessa divisão; configuraç�
 test('oculto/sujo suspende; regressar, online e foco retomam sem atuação',async()=>{const f=fixture();await f.configure();await f.visibility(false);await f.tick(60000);assert.equal(f.requests.length,1);await f.visibility(true);assert.equal(f.requests.length,2);f.dirty(true);await f.tick(60000);assert.equal(f.requests.length,2);f.dirty(false);await f.event('online');assert.equal(f.requests.length,3);await f.event('focus');assert.equal(f.requests.length,3);assert.ok(f.requests.every(r=>r.path.endsWith('/get')))});
 test('consulta lenta conta30s desde a resposta, não desde o início',async()=>{const f=fixture();await f.configure();let release;f.hold(()=>new Promise(r=>release=r));await f.tick(30000);const start=f.now;await f.tick(6000);release();await flush();await f.tick(29999);assert.equal(f.requests.length,2);await f.tick(1);assert.equal(f.requests.length,3);assert.ok(f.requests.at(-1).at-start>=36000)});
 test('confirmação de estore usa só o aparelho, no máximo5 consultas e nunca repete comando',async()=>{const f=fixture();await f.configure();await f.api.commandBlind('master-north','open');assert.equal(f.api.isBusy(),true);for(const delay of [1500,4000,8000,12000,16000])await f.tick(delay);assert.equal(f.api.isBusy(),false);const reads=f.requests.slice(2);assert.equal(reads.length,5);assert.ok(reads.every(r=>r.path.endsWith('/get')&&r.body.ids.length===1&&r.body.ids[0]===blind.deviceId));assert.equal(f.requests.filter(r=>r.path.endsWith('/set/cover')).length,1);assert.match(f.api.blindSnapshot('master-north').message,/sem confirmação/);assert.equal(f.api.blindSnapshot('master-north').lastPosition,40)});
+
+test('abrir e fechar estore não aborta a consulta em curso nem perde a resposta',async()=>{
+ const f=fixture();await f.configure();let release,signal;
+ f.hold(s=>{signal=s;return new Promise(r=>release=r)});await f.tick(30000);
+ const before=f.requests.length;await f.popup('blind-dialog',{blind:'master-north'});
+ assert.equal(signal.aborted,false);assert.equal(f.requests.length,before);
+ await f.popup('');assert.equal(signal.aborted,false);
+ release();await flush();await flush();assert.equal(f.api.isBusy(),false);
+ assert.equal(f.api.blindSnapshot('master-north').position,40);assert.equal(f.requests.length,before);
+ assert.ok(f.requests.every(r=>r.path.endsWith('/get')));
+});
+test('popup espera pela leitura em curso e reutiliza o estore recebido sem novo pedido',async()=>{
+ const f=fixture();await f.configure();let release,signal;
+ f.hold(s=>{signal=s;return new Promise(r=>release=r)});await f.tick(30000);
+ const before=f.requests.length;await f.popup('blind-dialog',{blind:'master-north'});
+ assert.equal(signal.aborted,false);release();await flush();await flush();
+ assert.equal(f.api.isBusy(),false);assert.equal(f.requests.length,before);
+ assert.equal(f.api.blindSnapshot('master-north').canPosition,true);
+});

@@ -7,6 +7,7 @@
  try{state=C.demo(JSON.parse(localStorage.getItem(KEY)),window.CasaPlans)}catch{}
  try{const v=JSON.parse(localStorage.getItem(BANNERS));if(typeof v==='boolean')showBanners=v}catch{}
  const overlay=document.createElement('div');overlay.id='blind-banners';$('plan-stage').append(overlay);
+ const windowControls=document.createElement('div');windowControls.id='blind-window-controls';$('plan-stage').append(windowControls);
  const check=$('show-blind-banners');check.checked=showBanners;
  check.addEventListener('change',()=>{showBanners=check.checked;try{localStorage.setItem(BANNERS,JSON.stringify(showBanners))}catch{}position()});
  const BARS='casa-leal-show-blind-bars-v1',barsCheck=$('show-blind-bars');let showBars=true;
@@ -16,7 +17,7 @@
  window.addEventListener('bannersizechange',()=>{bannerScale=window.CasaBannerSize.value();position()});
  function el(tag,attrs={}){const e=document.createElementNS(NS,tag);for(const [k,v]of Object.entries(attrs))e.setAttribute(k,v);return e}
  function remember(){try{localStorage.setItem(KEY,JSON.stringify(state))}catch{}update()}
- function blindInfo(id){const s=window.CasaCloudRead?.blindSnapshot?.(id)||{configured:false};return s.configured&&window.CasaShellySetup?.isDirty()?{...s,canControl:false,canPosition:false,canStop:false,quality:'Guarde a configuração antes de comandar'}:s}
+ function blindInfo(id){const s=window.CasaCloudRead?.blindSnapshot?.(id)||{configured:false};return s.configured&&window.CasaShellySetup?.isDirty()?{...s,canControl:false,canPosition:false,canSelectPosition:false,canStop:false,quality:'Guarde a configuração antes de comandar'}:s}
  function lightInfo(floor,room){const s=window.CasaCloudRead?.lightSnapshot?.(C.key(floor,room))||{configured:false};return s.configured&&window.CasaShellySetup?.isDirty()?{...s,canControl:false,quality:'Guarde a configuração antes de comandar'}:s}
  function visualState(){const v={lights:{...state.lights},blinds:{...state.blinds}};for(const id of window.CasaCloudRead?.blindEntries?.()||[]){const s=blindInfo(id);v.blinds[id]=s.position??s.lastPosition??0}for(const id of window.CasaCloudRead?.lightEntries?.()||[]){const s=window.CasaCloudRead.lightSnapshot(id);v.lights[id]=s.on??s.lastOn??false}return followers.resolve(v,blindInfo)}
  function demoPosition(id){return C.position(visualState(),id)}
@@ -54,7 +55,7 @@
  $('blind-follow-resume').addEventListener('click',()=>{if(!activeBlind||blindInfo(activeBlind.id).configured)return;followers.resume(activeBlind.id);update();syncBlind();syncRoom()});
  $('blind-configure').addEventListener('click',()=>{$('blind-dialog').close();window.CasaShellySetup?.openDevice('blind',activeBlind.id)});
  function mount(svg,floor){
-  current={svg,floor,shades:new Map(),warms:new Map(),beams:new Map(),hits:new Map(),banners:new Map()};overlay.replaceChildren();
+  current={svg,floor,shades:new Map(),warms:new Map(),beams:new Map(),hits:new Map(),banners:new Map()};overlay.replaceChildren();windowControls.replaceChildren();
   const p=window.CasaPlans[floor],base=svg.querySelector(':scope > g'),shape=base.querySelector(':scope > path'),defs=el('defs'),layer=el('g',{'data-addon':'room-lighting','pointer-events':'none'});
   // Local slats follow each bar's axis; only the measured closed portion is filled.
   for(const vertical of [true,false])for(const old of [false,true]){const pattern=el('pattern',{id:'home-blind-slats-'+(vertical?'v':'h')+(old?'-last':''),width:vertical?18:7,height:vertical?7:18,patternUnits:'userSpaceOnUse'});pattern.append(el('rect',{width:vertical?18:7,height:vertical?7:18,fill:old?'#c3a270':'#426e8c'}),el('path',{d:vertical?'M0 1H18':'M1 0V18',stroke:old?'#f1dfbf':'#d1e3ed','stroke-opacity':'.65','stroke-width':1}));defs.append(pattern)}
@@ -83,11 +84,13 @@
    if(floor==='3'&&window.CasaFloor3Render)w={...w,...window.CasaFloor3Render.HOTSPOTS[w.id]};
    if(floor==='4'&&window.CasaFloor4Render)w={...w,...window.CasaFloor4Render.HOTSPOTS[w.id]};
    const x=Math.min(w.x1,w.x2),y=Math.min(w.y1,w.y2),width=Math.abs(w.x2-w.x1),height=Math.abs(w.y2-w.y1);
-   const g=el('g',{'class':'blind-window',role:'button',tabindex:0,'aria-label':label(w),'data-blind-window':w.id});
+   const g=el('g',{'class':'blind-window','aria-hidden':'true','pointer-events':'none','data-blind-graphic':w.id});
    const target=el('rect',{x:x-14,y:y-14,width:width+28,height:height+28,fill:'transparent',class:'blind-hit'}),ring=el('rect',{x:x-(w.photoBounds?2:7),y:y-(w.photoBounds?2:7),width:width+(w.photoBounds?4:14),height:height+(w.photoBounds?4:14),rx:3,fill:'none',class:'blind-highlight','vector-effect':'non-scaling-stroke'});
    const barGeometry=window.CasaBlindBarCore.geometry(w),bar=el('g',{class:'blind-position-bar','data-orientation':barGeometry.vertical?'vertical':'horizontal','aria-hidden':'true','pointer-events':'none'}),track=el('rect',{x:barGeometry.x,y:barGeometry.y,width:barGeometry.width,height:barGeometry.height,rx:2,class:'blind-bar-track','vector-effect':'non-scaling-stroke'}),fill=el('rect',{x:barGeometry.x,y:barGeometry.y,width:0,height:0,rx:2,class:'blind-bar-fill'});bar.append(track,fill);
-   g.append(target,bar,ring);g.addEventListener('click',e=>{e.stopPropagation();openBlind(w.id)});g.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();openBlind(w.id)}});
-   g.addEventListener('pointerenter',()=>current?.banners.get(w.id)?.classList.add('window-hover'));g.addEventListener('pointerleave',()=>current?.banners.get(w.id)?.classList.remove('window-hover'));hits.append(g);current.hits.set(w.id,{g,target,w,x,y,width,height,bar,fill,barGeometry});
+   g.append(target,bar,ring);
+   const control=document.createElement('button');control.type='button';control.className='blind-window-trigger';control.dataset.blindWindow=w.id;control.setAttribute('aria-label',label(w));control.title='Manter premido para ajustar o estore';control.addEventListener('click',e=>{e.stopPropagation();openBlind(w.id)});
+   for(const [event,active]of [['pointerenter',true],['pointerleave',false],['focus',true],['blur',false]])control.addEventListener(event,()=>{g.classList.toggle('window-hover',active);current?.banners.get(w.id)?.classList.toggle('window-hover',active)});windowControls.append(control);
+   g.addEventListener('pointerenter',()=>current?.banners.get(w.id)?.classList.add('window-hover'));g.addEventListener('pointerleave',()=>current?.banners.get(w.id)?.classList.remove('window-hover'));hits.append(g);current.hits.set(w.id,{g,target,control,w,x,y,width,height,bar,fill,barGeometry});
    const banner=document.createElement('button');banner.type='button';banner.className='blind-banner';banner.dataset.blind=w.id;
    const icon=document.createElement('span');icon.className='blind-banner-icon';icon.setAttribute('aria-hidden','true');icon.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"><path d="M5 5h14M5 9h14M5 13h14M5 17h14"/></svg>';
    const copy=document.createElement('span');copy.className='blind-banner-copy';const name=document.createElement('span');name.className='blind-banner-name';name.textContent=p.rooms.find(r=>r.id===w.room)?.name||w.name;const percent=document.createElement('strong');percent.className='blind-banner-percent';const windowStatus=document.createElement('small');windowStatus.className='blind-banner-window-state';windowStatus.hidden=true;copy.append(name,percent,windowStatus);banner.append(icon,copy);
@@ -112,7 +115,7 @@
   for(const w of C.WINDOWS.filter(w=>w.floor===floor)){
    const info=blindInfo(w.id),p=C.position(displayState,w.id);current.beams.get(w.id).setAttribute('opacity',C.beamOpacity(displayState,w.id,night));
    const stops=current.svg.querySelectorAll('#moon-'+w.id+' stop');stops[0].setAttribute('stop-color',night?'#b8dcff':'#fff5d5');stops[1].setAttribute('stop-color',night?'#91b9ec':'#fffaf0');
-   const b=current.banners.get(w.id);b.querySelector('.blind-banner-percent').textContent=info.configured?(info.position===null?(info.lastPosition===null?'—':info.lastPosition+'% · Última leitura'):info.position+'%'):p+'%';b.dataset.quality=info.configured&&info.quality?'unknown':'';b.setAttribute('aria-label',label(w));b.title=label(w);current.hits.get(w.id).g.setAttribute('aria-label',label(w));
+   const b=current.banners.get(w.id);b.querySelector('.blind-banner-percent').textContent=info.configured?(info.position===null?(info.lastPosition===null?'—':info.lastPosition+'% · Última leitura'):info.position+'%'):p+'%';b.dataset.quality=info.configured&&info.quality?'unknown':'';b.setAttribute('aria-label',label(w));b.title=label(w);current.hits.get(w.id).control.setAttribute('aria-label',label(w));
    const h=current.hits.get(w.id),reading=window.CasaBlindBarCore.reading(info,p),bg=h.barGeometry;h.bar.style.display=showBars?'':'none';h.bar.dataset.quality=reading.quality;h.fill.setAttribute('width',bg.vertical?bg.width:bg.width*(reading.closed??0));h.fill.setAttribute('height',bg.vertical?bg.height*(reading.closed??0):bg.height);h.bar.dataset.open=reading.position===null?'unknown':String(reading.position);
   }
   position();
@@ -123,6 +126,7 @@
    if(w.side==='north')y+=29;else if(w.side==='south')y-=29;else x=w.x1;
    banner.querySelector('.blind-banner-name').textContent=window.CasaRoomNames.get(current.floor,w.room);const p=new DOMPoint(x,y).matrixTransform(matrix);banner.hidden=!showBanners;banner.style.setProperty('--blind-banner-scale',String(bannerScale/100));banner.style.transformOrigin=w.side==='west'?'left center':'center center';banner.style.transform=(w.side==='west'?'translate(-18px,-50%)':'translate(-50%,-50%)')+' scale('+bannerScale/100+')';banner.style.width=Math.max(86,Math.min(140,230*scale))+'px';const windowState=window.CasaWindows?.state(id),windowOpen=windowState?.open===true,windowUnknown=windowState?.configured&&windowState.open===null,status=banner.querySelector('.blind-banner-window-state');banner.classList.toggle('window-is-open',windowOpen);status.hidden=!windowOpen&&!windowUnknown;status.textContent=windowOpen?'Janela aberta'+(windowState.configured?'':' · demo'):windowUnknown?'Janela por confirmar':'';const caption=label(w)+(windowState?' · Janela: '+windowState.caption:'');banner.setAttribute('aria-label',caption);banner.title=caption;banner.style.left=(p.x-rect.left)+'px';banner.style.top=(p.y-rect.top)+'px';
    const pad=Math.max(14,22/Math.max(.1,scale));h.target.setAttribute('x',h.x-pad);h.target.setAttribute('y',h.y-pad);h.target.setAttribute('width',h.width+2*pad);h.target.setAttribute('height',h.height+2*pad);
+   const a=new DOMPoint(h.x-pad,h.y-pad).matrixTransform(matrix),b=new DOMPoint(h.x+h.width+pad,h.y+h.height+pad).matrixTransform(matrix),box={left:Math.min(a.x,b.x),top:Math.min(a.y,b.y),width:Math.abs(b.x-a.x),height:Math.abs(b.y-a.y)};h.control.hidden=!box.width||!box.height;h.control.style.left=(box.left-rect.left)+'px';h.control.style.top=(box.top-rect.top)+'px';h.control.style.width=box.width+'px';h.control.style.height=box.height+'px';
   }
  }
  const icons={power:'<path d="M12 3v9M6.3 5.6a9 9 0 1 0 11.4 0"/>',refresh:'<path d="M3 12a9 9 0 0 1 15.74-6.26L21 8M21 3v5h-5M21 12a9 9 0 0 1-15.74 6.26L3 16M8 16H3v5"/>',blind:'<path d="M5 4h14M5 8h14M5 12h14M5 16h14M12 16v5"/>'};
@@ -184,6 +188,20 @@
 
  async function setAllBlinds(value){if(value!==0&&value!==100)throw new TypeError('Posição de estores inválida');const result={sent:0,simulated:0,skipped:0};for(const w of C.WINDOWS){const s=blindInfo(w.id);if(!s.configured){followers.manual(w.id,visualState(),blindInfo);state.blinds[w.id]=value;result.simulated++;continue}if(!s.canControl){result.skipped++;continue}try{await window.CasaCloudRead.commandBlind(w.id,value===100?'open':'close');result.sent++}catch{result.skipped++}}remember();syncRoom();return result}
  window.addEventListener('roomnameschange',position);window.addEventListener('energychange',()=>{update();syncBlind();syncRoom()});window.addEventListener('environmentchange',update);
- window.CasaBlindDragAdapter={selector:'.blind-window,.blind-banner',id:node=>node.dataset.blindWindow||node.dataset.blind,snapshot(id){const s=blindInfo(id);return {configured:s.configured,position:s.configured?s.position:demoPosition(id),allowed:!s.configured||s.canPosition,token:s.configured?'real:'+s.revision:'demo'}},commit:changeBlind};
+ // Resolve the visible bar in SVG coordinates as well as its HTML accessibility control.
+ // Safari can target the plan underneath a transparent overlay; the same bar must still work.
+ function blindTarget(event){
+  const direct=event.target.closest?.('.blind-window-trigger,.blind-banner');if(direct)return direct;
+  const stage=$('plan-stage');if(!current||!stage.contains(event.target)||event.target.closest?.('button,[role=button],.room-label,.balcony-sensor-badge'))return null;
+  if(event.target!==stage&&event.target!==windowControls&&!event.target.closest?.('#plan-canvas'))return null;
+  const matrix=current.svg.getScreenCTM();if(!matrix)return null;
+  const point=new DOMPoint(event.clientX,event.clientY).matrixTransform(matrix.inverse()),pad=Math.max(14,22/Math.max(.1,Math.hypot(matrix.a,matrix.b)));
+  let match=null,distance=Infinity;for(const h of current.hits.values())if(point.x>=h.x-pad&&point.x<=h.x+h.width+pad&&point.y>=h.y-pad&&point.y<=h.y+h.height+pad){const d=Math.hypot(point.x-h.x-h.width/2,point.y-h.y-h.height/2);if(d<distance){match=h.control;distance=d}}return match;
+ }
+ $('plan-stage').addEventListener('click',event=>{
+  if(event.target.closest?.('.blind-window-trigger,.blind-banner')||document.querySelector('dialog[open]')||window.CasaMeteoBridge?.visible()||document.body.classList.contains('room-power-mode'))return;
+  const control=blindTarget(event);if(!control)return;event.preventDefault();event.stopImmediatePropagation();openBlind(control.dataset.blindWindow);
+ },true);
+ window.CasaBlindDragAdapter={selector:'.blind-window-trigger,.blind-banner',target:blindTarget,context:()=>document.getElementById('plan-stage').getAttribute('aria-label'),id:node=>node.dataset.blindWindow||node.dataset.blind,snapshot(id){const s=blindInfo(id);return {configured:s.configured,position:s.configured?s.position:demoPosition(id),previewAllowed:!s.configured||s.canSelectPosition,allowed:!s.configured||s.canPosition,token:s.configured?'real:'+s.revision:'demo'}},commit:changeBlind};
  window.CasaHome={mount,position,decorateRoom,setAllLights,setAllBlinds,snapshot:()=>C.demo(state,window.CasaPlans)};
 })();

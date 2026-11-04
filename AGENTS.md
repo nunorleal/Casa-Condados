@@ -874,3 +874,51 @@ Snapshot inicial e final exigem estado controlável/posição válida; geração
 36 testes de estores aprovados nas duas apps; relógio/DOM fictícios garantem zero comandos na pré-visualização/cancelamento/estado alterado e um único ao largar. UI fictícia confirmou Condados40→60, T2demo0→20 e T2Cloud50→70 com um set/cover e confirmação por leitura. Escape em pré-visualização90 preservou70 e contador de comandos1. Cliques curtos abrem ambos os popups. Fixtures intercetam pedidos com IDs/chaves fictícios; nenhum equipamento real usado.
 
 Verificação: suites279 testes T2/296 Condados aprovadas e testes dirigidos11/17 após ajuste final. UI com fixtures fictícias confirmou pressão750ms nos dois projetos abre opções sem qualquer comando;5min envia toggle_after300, personalizado23min envia1380, zero bloqueado pelo formulário sem envio; clique normal posterior envia on:false sem duração. Teclado ArrowDown abre opções sem comando e fechar devolve foco, painel oculto por omissão. Leitura temporariamente ocupada só desativa escolhas, nunca apaga duração em edição; fechar permanece disponível. Capturas review/appliance-timer-longpress.jpg e T2 review/appliance-timer-compact.jpg. Nenhum aparelho real testado.
+
+Temporizador ativo: botão normal e cronómetro passam a âmbar exclusivamente com timer reportado pelo Shelly e alimentação on:true atual/fresca. relayTimer normaliza Gen1 has_timer/timer_remaining e Gen2 timer_started_at/timer_duration usando relógio do dispositivo quando presente. Restante tempo decresce a partir da consulta existente; sem polling/timers novos, persistência local ou estado otimista pela aceitação do comando. Desligado, expirado, dados antigos/offline/erro ou falta de prova retiram âmbar. Pontes/snapshots expõem apenas timerActive seguro; cores normais mantidas fora desse estado.
+
+# Fluidez e repetição do gesto dos estores — 1.172
+
+Separar previewAllowed (dados reais válidos/recentes e associação válida) de allowed (fila livre/confirmada). O gesto pode selecionar durante leitura ou confirmação pendente; ao largar, sendWhenReady verifica cache a cada100ms até15s, sem consultas Cloud novas, e envia uma única vez quando allowed. Nunca repetir comando enviado/falhado. Se expirar, estado inválido/antigo/offline, configuração/geração/contexto alterado ou cancelamento: não enviar. Nova seleção cancela espera anterior; resposta antiga não substitui a pré-visualização nova. Escape cancela também espera.
+
+Após450ms capturar no documentElement estável, não no botão que render/leituras podem substituir. Reencontrar alvo pelo ID lógico no piso/contexto atual, preservando clique curto e suprimindo clique residual mesmo com novo nó. Ignorar perda da captura implícita de botão substituído se alvo equivalente continua no mesmo contexto. Ocultar/mudar de piso/blur cancela.
+
+42 testes aprovados (29Condados+13T2), incluindo4gestos consecutivos após substituição de nós, fila temporariamente ocupada, timeout/cancelamento/configuração/erro e nenhum retry. FixtureT2 forçou redesenho e consulta lenta6s durante cada gesto e confirmou50→70→90, dois pedidos set/cover, zero popups. Condados40→60→80, dois pedidos. Todos os pedidos intercetados com IDs/chaves fictícios, nenhum equipamento real movido. ProvaT2 review/estores-fluidos-2.91.png.
+
+Verificação da cor: suites completas283/300 aprovadas, mais testes dirigidos de expiração durante leitura fresca, leitura antiga/offline, aparelho desligado e canal errado. Fixture em ambas confirmou data-timer-active:true/background rgb198,140,32 após leitura nativa; nenhuma cor ativa pela mera aceitação HTTP. Captura review/appliance-timer-active.jpg. Sem equipamentos reais.
+
+# Âmbar apenas no cronómetro escolhido — 1.173
+
+Correção explícita: nunca recolorir o botão de alimentação inteiro. Apenas ::after cronómetro fica âmbar e só depois de comando explícito com toggleAfter aceite nesta sessão/generation, acompanhado de timer nativo ativo e alimentação atual confirmada. Auto-off preexistente do Shelly não seleciona este modo. Comando normal aceite (on/off sem duração) apaga seleção; comando falhado não inventa seleção. Marcador efémero por aparelho, limitado à duração escolhida e invalidado pela mudança de configuração; não guardar em backups/configurações. Reabrir o popup mantém a seleção na mesma sessão; recarregar a app não assume a origem de timer nativo. Preservar cores normais/verde da alimentação.
+
+Verificação da correção: testes só fictícios distinguem timer nativo preexistente/ligar normal (sem âmbar) de escolha explícita de duração; expiração, offline e mudança de generation não ativam aviso. UI de ambas confirmou botão verde rgb12,169,102/rgb8,165,98 e exclusivamente cronómetro âmbar rgb255,211,107. Captura review/appliance-timer-badge-only.jpg.
+
+# Escadas sob luz noturna — 1.174
+
+1.174: apenas o recorte noturno das escadas recebe uma matriz SVG sRGB que converte a luminância da madeira para tom frio azulado. Mantém a sombra preta72%, geometria e textura originais. Dia, fechado e elétrico sem mudança de cor. A mistura por abertura/luz da Sala2 existente continua a controlar o resultado. 14 testes aprovados; fixture noturna com estore100% confirmou o tom frio e zero comandos Cloud. Prova review/escadas-azul-1.174.png.
+
+# Captura do estore e cliques residuais - 1.175
+
+A transferencia para documentElement pode gerar lostpointercapture no botao original ainda ligado ao DOM. Ignorar esse evento original; cancelar so perda real no documentElement sem hasPointerCapture. Pointerup ativo previne default. Suprimir clique fisico residual mesmo retargetado para outro antepassado. Novo pointerdown primario limpa supressao antiga, preservando clique curto seguinte. Suprimir contextmenu durante captura, incluindo alvo root.
+
+Hold em estore indisponivel mostra mensagem sem percentagem inventada, popup, consulta ou comando. Clique curto preserva consulta normal. Manter fila e guards existentes.
+
+52 testes aprovados (34Condados+18T2). Pressoes nativas de850ms repetidas: contador Condados4 para4, traceT2 de2 para2, zero popups/comandos. Ajuste ficticio50 para70 envia um set/cover e confirma70; clique curto nativo abre popup. Nenhum equipamento real usado. Prova review/estores-captura-1.175.png nos Condados.
+
+# Abertura matinal liberta modo diurno — MeteoNL2.80
+
+Bug: bedsideMode só removia holdNight/holdRed quando estore100%, mantendo baseNight/baseRed, por isso o botão matinal podia abrir sem sair do vermelho/noturno. Após aceitação explícita do botão, armar pedido matinal no estado bedside existente; só uma posição100% atual confirmada liberta ambos os modos. Aceitação HTTP, percentagem parcial e dados antigos/offline nunca bastam. Libertação diurna persiste no mesmo estado/assinatura até pôr do sol, incluindo recarregar/reabrir Meteo e fechar depois o estore; ao pôr do sol retoma a programação/manual normal. Não reescrever preferências, IDs, transportes ou criar consultas/timers Cloud; relógio React existente atualiza ponte. Sem pedido matinal explícito, preservar semântica anterior da opção manter até100%.
+
+# Botoes HTML sobre as barras dos estores - 1.176
+
+Nos Condados o desenho do estore continua SVG, mas o gesto/clique/teclado passam para button.blind-window-trigger nativo, como no T2. Criar em #blind-window-controls, data-blind-window identifica o estore. SVG original usa data-blind-graphic, aria-hidden e pointer-events:none, sem foco duplicado. Alinhar cada button com getBoundingClientRect do blind-hit existente em CasaHome.position, incluindo zoom/redimensionamento. Nao alterar renders, barras ou associacoes. Remover todos os botoes ao mudar piso. Hover/foco realca a barra original; banners permanecem acima e modo consumo oculta estes controlos.
+
+Adapter dos Condados seleciona .blind-window-trigger,.blind-banner. Preservar fila/guards/preview/confirmacao existentes; configuracao suja tambem bloqueia canSelectPosition. T2 sem alteracoes nesta entrega.
+
+37 testes de estores/navegacao aprovados. Browser confirmou BUTTON sob o rato, alinhamento dos sete alvos do piso3 (erro inferior a1px), pressao nativa1100ms com trace visible:true,text:40% e depois60%, sem popup. Fixture confirmou40 para60 com um comando e leitura, preview80 cancelado preservou60. Mudanca para piso4 deixou apenas2botoes e nenhum alvo do piso anterior. Prova review/estores-html-condados-1.176.png. Tudo com IDs/chave ficticios e fetch intercetado.
+
+Verificação2.80: builds de ambas aprovados, suites completas290 T2/308 Condados aprovadas, regressões Meteo29/20. Ensaio isolado com estore fictício confirmou botão ausente antes do sol, exatamente um comando master/open, vermelho durante pedido/50%, palette day e classe red-night removida aos100% em ambas. Classe red-night sincronizada com useLayoutEffect antes da pintura para evitar fundo preto residual em atualizações adiadas do browser. Captura review/meteo-morning-day-2.80.jpg. Nenhum estore real comandado.
+
+# Historico de energia retirado - 1.182
+
+Por pedido do utilizador, foram retirados os graficos locais, a importacao/exportacao CSV e os modulos energy-history. Manter o contador atual e os controlos anteriores. Nao acrescentar descargas de historico, polling extra ou testes no Shelly real. O CSV privado no Ambiente de Trabalho e eventuais dados antigos do navegador nao foram apagados.
