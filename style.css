@@ -20,3 +20,7 @@ dialog .check-row{display:flex;align-items:center;justify-content:space-between;
 .topbar{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);gap:16px}.brand{justify-self:start;background:transparent;padding:0;text-align:left;min-height:46px;color:inherit}.weather-widget{justify-self:center;justify-content:center}.top-settings{-webkit-appearance:none;appearance:none;justify-self:end;display:inline-flex;align-items:center;justify-content:center;width:44px;height:44px;min-width:44px;flex-shrink:0;padding:0;margin:0;border:1px solid #ffffff1b;border-radius:50%;background:#ffffff0b;color:#ffffffc0;line-height:1;transition:background .2s}.top-settings:hover{background:#ffffff24}.top-settings svg{display:block;pointer-events:none;flex-shrink:0}footer{bottom:max(12px,env(safe-area-inset-bottom));gap:0}#plan-stage{bottom:calc(48px + env(safe-area-inset-bottom))}
 @media(max-width:550px){.topbar{grid-template-columns:minmax(0,1fr) auto 44px;gap:8px}.brand{font-size:18px;gap:8px}.brand-mark{width:34px;height:38px;font-size:28px}.weather-widget{gap:6px;min-width:0}.weather-widget strong{font-size:23px}.weather-widget small{font-size:8px;max-width:100px}.weather-widget svg{width:25px;height:25px}#plan-stage{bottom:calc(44px + env(safe-area-inset-bottom))}}
 @media(max-height:650px){#plan-stage{bottom:calc(40px + env(safe-area-inset-bottom))}}
+
+.backup-settings .check-row[hidden]{display:none}
+
+.backup-settings [hidden]{display:none}
