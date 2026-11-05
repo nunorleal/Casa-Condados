@@ -2,7 +2,7 @@
 (function(root,factory){if(typeof module==='object'&&module.exports)module.exports=factory(require('./label-layout-core.js'),require('./meteo-core.js'),require('./home-core.js'));else root.CasaBackupCore=factory(root.CasaLabelLayoutCore,root.CasaMeteoCore,root.CasaHomeCore)})(typeof window==='undefined'?globalThis:window,function(Layout,Meteo,Home){
  'use strict';
  const FORMAT='casa-leal-backup-v1';
- const KEYS={showCats:'casa-leal-show-cats-v1',fanLayout:'casa-leal-fan-layout-v1',studioBulbMoved:'casa-leal-gui-bulb-moved-to-studio-v1',balconyAppliancesAssociated:'casa-leal-balcony-appliances-associated-v1',dishwasherAssociated:'casa-leal-dishwasher-associated-v1',dehumidifierAssociated:'casa-leal-dehumidifier-associated-v1',dehumidifierLayout:'casa-leal-dehumidifier-layout-v1',showDehumidifier:'casa-leal-show-dehumidifier-v1',heaterAssociated:'casa-leal-heater-associated-v1',heaterLayout:'casa-leal-heater-layout-v1',showHeater:'casa-leal-show-heater-v1',roomNames:'casa-leal-room-names-v1',tvAssociated:'casa-leal-tv-associated-v1',tvLayout:'casa-leal-tv-layout-v1',showBlindBars:'casa-leal-show-blind-bars-v1',bannerScale:'casa-leal-banner-scale-v1',evLayout:'casa-leal-ev-layout-v1',environment:'casa-nova-environment-v1',showRoomLabels:'casa-nova-labels-v1',showSensorReadings:'casa-leal-show-sensor-readings-v1',showVelux:'casa-nova-show-velux-v1',showBathroomFixtures:'casa-leal-show-bathroom-fixtures-v1',showBlindBanners:'casa-leal-show-blind-banners-v1',showEnergyBanner:'casa-leal-show-energy-banner-v1',showEVBanner:'casa-leal-show-ev-banner-v1',meterAssociated:'casa-leal-em-associated-v1',evAssociated:'casa-leal-ev-associated-v1',windowContactsAssociated:'casa-leal-window-contacts-associated-v1',windowDemo:'casa-leal-window-demo-v1',bulbsAssociated:'casa-leal-bulbs-associated-v1',alarmAssociated:'casa-leal-alarm-associated-v1',firstBlindsAssociated:'casa-leal-first-blinds-associated-v1',gateAssociated:'casa-leal-gate-associated-v1',entranceAssociated:'casa-leal-entrance-associated-v1',meteoTemperatureAssociated:'casa-leal-meteo-temperature-associated-v1',garageTemperatureAssociated:'casa-leal-garage-temperature-associated-v1',roomTemperatureAssociated:'casa-leal-room-temperature-associated-v1',homeDemo:'casa-leal-home-demo-v1',shellySetup:'casa-leal-shelly-setup-v1',screensaver:'casa-nova-screensaver-v1',blindBannerScale:'casa-leal-blind-banner-scale-v1',sensorBannerScale:'casa-leal-sensor-banner-scale-v1',alarmLayout:'casa-leal-alarm-layout-v1',sensorLayout:'casa-leal-sensor-layout-v1',labelLayout:'casa-nova-room-label-layout-v1',meteo:'casa-nl-meteo-v1'};
+ const KEYS={shellyCredentials:'casa-leal-cloud-auth-v1',showCats:'casa-leal-show-cats-v1',fanLayout:'casa-leal-fan-layout-v1',studioBulbMoved:'casa-leal-gui-bulb-moved-to-studio-v1',balconyAppliancesAssociated:'casa-leal-balcony-appliances-associated-v1',dishwasherAssociated:'casa-leal-dishwasher-associated-v1',dehumidifierAssociated:'casa-leal-dehumidifier-associated-v1',dehumidifierLayout:'casa-leal-dehumidifier-layout-v1',showDehumidifier:'casa-leal-show-dehumidifier-v1',heaterAssociated:'casa-leal-heater-associated-v1',heaterLayout:'casa-leal-heater-layout-v1',showHeater:'casa-leal-show-heater-v1',roomNames:'casa-leal-room-names-v1',tvAssociated:'casa-leal-tv-associated-v1',tvLayout:'casa-leal-tv-layout-v1',showBlindBars:'casa-leal-show-blind-bars-v1',bannerScale:'casa-leal-banner-scale-v1',evLayout:'casa-leal-ev-layout-v1',environment:'casa-nova-environment-v1',showRoomLabels:'casa-nova-labels-v1',showSensorReadings:'casa-leal-show-sensor-readings-v1',showVelux:'casa-nova-show-velux-v1',showBathroomFixtures:'casa-leal-show-bathroom-fixtures-v1',showBlindBanners:'casa-leal-show-blind-banners-v1',showEnergyBanner:'casa-leal-show-energy-banner-v1',showEVBanner:'casa-leal-show-ev-banner-v1',meterAssociated:'casa-leal-em-associated-v1',evAssociated:'casa-leal-ev-associated-v1',windowContactsAssociated:'casa-leal-window-contacts-associated-v1',windowDemo:'casa-leal-window-demo-v1',bulbsAssociated:'casa-leal-bulbs-associated-v1',alarmAssociated:'casa-leal-alarm-associated-v1',firstBlindsAssociated:'casa-leal-first-blinds-associated-v1',gateAssociated:'casa-leal-gate-associated-v1',entranceAssociated:'casa-leal-entrance-associated-v1',meteoTemperatureAssociated:'casa-leal-meteo-temperature-associated-v1',garageTemperatureAssociated:'casa-leal-garage-temperature-associated-v1',roomTemperatureAssociated:'casa-leal-room-temperature-associated-v1',homeDemo:'casa-leal-home-demo-v1',shellySetup:'casa-leal-shelly-setup-v1',screensaver:'casa-nova-screensaver-v1',blindBannerScale:'casa-leal-blind-banner-scale-v1',sensorBannerScale:'casa-leal-sensor-banner-scale-v1',alarmLayout:'casa-leal-alarm-layout-v1',sensorLayout:'casa-leal-sensor-layout-v1',labelLayout:'casa-nova-room-label-layout-v1',meteo:'casa-nl-meteo-v1'};
  function object(v,allowed){if(!v||typeof v!=='object'||Array.isArray(v)||Object.keys(v).some(k=>!allowed.includes(k)))throw Error('O ficheiro contém campos inválidos ou desconhecidos.');return v}
  function city(v){
   if(v===null)return null;
@@ -13,6 +13,12 @@
   for(const k of ['admin1','country','country_code','timezone'])if(v[k]!==undefined){if(typeof v[k]!=='string'||v[k].length>150)throw Error('Cidade inválida.');out[k]=v[k]}
   if(out.timezone){try{new Intl.DateTimeFormat('pt-PT',{timeZone:out.timezone})}catch{throw Error('Fuso horário da cidade inválido.')}}
   return out;
+ }
+ function credentials(value){
+  if(value&&Object.hasOwn(value,'encrypted')){const Crypto=typeof module==='object'&&module.exports?require('./backup-crypto.js'):globalThis.CasaBackupCrypto;const clean=Crypto.validate(value),server=Home.server(clean.server);return {server,encrypted:clean.encrypted}}
+  object(value,['server','authKey']);if(typeof value.server!=='string')throw Error('Servidor da chave Cloud invalido.');const server=Home.server(value.server);
+  if(!server||typeof value.authKey!=='string'||!value.authKey.trim()||value.authKey.length>4096||/[\r\n]/.test(value.authKey))throw Error('Chave Shelly Cloud ausente ou invalida.');
+  return {server,authKey:value.authKey};
  }
  function data(v,plans){
   object(v,Object.keys(KEYS));if(!Object.keys(v).length)throw Error('A cópia não contém dados para importar.');const out={};
@@ -25,6 +31,7 @@
    else if(k==='roomNames')out[k]=(typeof module==='object'&&module.exports?require('./room-names-core.js'):globalThis.CasaRoomNamesCore).validate(value,plans);
    else if(k==='homeDemo')out[k]=Home.demo(value,plans);
    else if(k==='shellySetup')out[k]=Home.setup(value,plans);
+   else if(k==='shellyCredentials')out[k]=credentials(value);
    else if(k==='screensaver')out[k]=Meteo.screensaver(value);
    else if(k==='bannerScale')out[k]=Layout.sensorScale(value);
    else if(k==='tvLayout')out[k]=Layout.tvPositions(value,plans);
@@ -36,6 +43,7 @@
    else if(k==='labelLayout')out[k]=Layout.positions(value,plans);
    else if(k==='meteo')out[k]=Meteo.preferences(value);
   }
+  if(out.shellyCredentials&&(!out.shellySetup||out.shellySetup.server!==out.shellyCredentials.server))throw Error('A chave Cloud nao corresponde ao servidor da configuracao neste JSON.');
   return out;
  }
  function validate(v,plans){
@@ -44,9 +52,11 @@
   if(typeof v.version!=='string'||!/^1\.\d{3}$/.test(v.version)||typeof v.exportedAt!=='string'||!Number.isFinite(Date.parse(v.exportedAt)))throw Error('Identificação da cópia inválida.');
   return {format:FORMAT,version:v.version,exportedAt:v.exportedAt,data:data(v.data,plans)};
  }
- function create(value,plans,now=new Date()){return validate({format:FORMAT,version:'1.155',exportedAt:now.toISOString(),data:value},plans)}
- function write(storage,backup,plans){
+ function create(value,plans,now=new Date()){return validate({format:FORMAT,version:'1.200',exportedAt:now.toISOString(),data:value},plans)}
+ function write(storage,backup,plans,{restoreCredentials=false}={}){
   const clean=validate(backup,plans);
+  if(!restoreCredentials)delete clean.data.shellyCredentials;
+  if(clean.data.shellyCredentials?.encrypted)throw Error('Introduza a palavra-passe do backup antes de restaurar a chave.');
   if(clean.data.shellySetup){
    try{const current=Home.setup(JSON.parse(storage.getItem(KEYS.shellySetup)),plans);if(current.server===clean.data.shellySetup.server)for(const key of ['fan','studioBindings','mediaBindings','balconyMeters','dishwasherMeter','dehumidifier','heater','tvMeter','homeEnergy','evMeter','entranceContact','gateContact','windowContacts','alarm','meteoSensor','garageSensor','livingSensor','masterSensor'])if(clean.data.shellySetup[key]===undefined&&current[key]!==undefined)clean.data.shellySetup[key]=current[key]}catch{}
   }
