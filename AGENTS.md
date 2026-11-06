@@ -1022,3 +1022,7 @@ Validação do histórico:341 testesT2 e375Duplex aprovados, só dados fictício
 ScreenRain acrescenta18gotas locais por período de chuva/trovoada, estáveis entre renders, sem eventos ou rede. Camada não interativa acima do conteúdo; animação CSS apenas com movimento ativo, respeita reduced-motion e efeitos0. Modo vermelho mantém preto e oculta gotas. Preservar preferências, leituras, configurações e comandos. Testar exclusivamente com dados fictícios.
 
 Validação: build Safari15 aprovado nas duas apps; fixture Meteo isolada confirmou18gotas em chuva, zero fora da chuva e no vermelho, e animação desativada pela preferência. Camada pointer-events:none permite abrir definições. T2 cabeçalho centrado em768px (centro384px) e1440px (centro720px), sem overflow em375px. Sem testes em equipamentos reais. Provas em review/meteo-rain-glass-2.90.jpg e, naT2, review/header-centered-2.128.jpg.
+
+# Regeneração TV5–25W — 1.223
+
+Por pedido do utilizador, substituir limite superior35W por25W inclusive. TV regeneração5≤W≤25, em utilização acima25W, standby abaixo5W, preservando guardas de leitura/online/frescura e estimativa. Indicadores/reflexos/MeteoNL reutilizam estado existente. Sem alterações de associações, credenciais, consultas ou comandos. Validar só com dados fictícios.
