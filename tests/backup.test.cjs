@@ -26,3 +26,5 @@ test('a failed storage write rolls back every changed preference',()=>{
 });
 
 test('cat visibility roundtrips as an optional boolean without replacing older preferences',()=>{const b=C.create({showCats:false},plans),s=storage();C.write(s,b,plans);assert.equal(s.getItem(C.KEYS.showCats),'false');assert.throws(()=>C.create({showCats:'false'},plans));C.write(s,C.create({showRoomLabels:true},plans),plans);assert.equal(s.getItem(C.KEYS.showCats),'false')});
+
+test('daily energy export/import preserves baseline and resumes on another device',()=>{const D=require('../daily-energy-core.js'),key=D.identity('https://shelly-1-eu.shelly.cloud',{deviceId:'deadbeef0011',channel:1}),at=Date.parse('2026-11-06T09:00:00Z'),ledger=D.create();ledger.record(key,100,at);ledger.record(key,101,at+1000);const b=C.create({...full,dailyEnergy:ledger.snapshot()},plans),target=storage();C.write(target,JSON.parse(JSON.stringify(b)),plans);const next=D.create(JSON.parse(target.getItem(C.KEYS.dailyEnergy)));next.record(key,102,at+2000);assert.equal(next.today(key,at+2000).kWh,2);b.data.dailyEnergy.entries[key].last[1]=-1;assert.throws(()=>C.write(target,b,plans));});
