@@ -138,6 +138,11 @@
   }
   function apply(data,ids){
    const has=b=>b&&ids.includes(b.deviceId),find=b=>data.find(d=>d.id.toLowerCase()===b.deviceId.toLowerCase()),stamp=r=>({...r,fetchedAt:now()});
+   if(typeof window!=='undefined'&&window.CasaDailyEnergy){
+    const capture=(b,kind='auto')=>{if(!has(b))return;const device=find(b),r=kind==='emeter'?E.status(device,b):kind==='cover'?Covers.meterStatus(device,b):kind==='light'?lightMeter(device,b):Heater.status(device,b);window.CasaDailyEnergy.record(credentials.server,{...b,...(kind==='emeter'?{component:'emeter'}:['cover','light'].includes(kind)?{kind}:{})},{...r,online:device?.online===true||device?.online===1,error:device?.error,missing:!device,fetchedAt:now()})};
+    function lightMeter(device,b){const s=device?.status||{},c=s['light:'+b.channel]||s.lights?.[b.channel];if(!c)return Heater.status(device,b);const valid=s.is_valid!==false&&c.is_valid!==false&&!s.errors?.length&&!c.errors?.length;const total=c.aenergy?.total;if(total===undefined)return Heater.status(device,b);return {energyKWh:valid&&Number.isFinite(total)&&total>=0?total/1000:null}}
+    capture(meter,'emeter');capture(evMeter,'emeter');for(const e of roomPowerBindings())if(e.role!=='meter')capture(e.b,e.kind==='cover'||e.kind==='light'?e.kind:'auto');
+   }
    for(const id of ids){const d=data.find(v=>v.id.toLowerCase()===id.toLowerCase()),online=d?.online===false||d?.online===0?false:d?.online===true||d?.online===1?true:null;deviceConnections.set(id,{online,fetchedAt:now()})}
    for(const e of roomPowerBindings())if(has(e.b)){const d=find(e.b),kind=e.kind==='light'?(Lights.status(d,e.b).resolvedType==='light'?'light':'relay'):e.kind;roomMeters.set(e.cache,stamp(RoomPower.reading(d,e.b,kind)))}
    for(const [role,b]of Object.entries(mediaBindings))if(has(b)){const device=find(b),r=stamp({...TV.status(device,b),energyKWh:Heater.status(device,b).energyKWh});mediaReadings[role]=r;if(TV.fresh(r,now())){mediaLast[role]={...mediaLast[role],powerWatts:r.powerWatts,fetchedAt:r.fetchedAt};if(Number.isFinite(r.energyKWh))mediaLast[role].energyKWh=r.energyKWh}}
