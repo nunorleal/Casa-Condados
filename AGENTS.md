@@ -1026,3 +1026,7 @@ Validação: build Safari15 aprovado nas duas apps; fixture Meteo isolada confir
 # Regeneração TV5–25W — 1.223
 
 Por pedido do utilizador, substituir limite superior35W por25W inclusive. TV regeneração5≤W≤25, em utilização acima25W, standby abaixo5W, preservando guardas de leitura/online/frescura e estimativa. Indicadores/reflexos/MeteoNL reutilizam estado existente. Sem alterações de associações, credenciais, consultas ou comandos. Validar só com dados fictícios.
+
+# Energia e Tarifários — 1.224
+
+Custos abaixo dos kWh nos cartões e histórico. Reutilizar diferenças do ledger existente com detalhe de meias horas em Europe/Lisbon e limite global de 48 000 registos horários. Preservar totais diários, associações, fila e comandos. Vigências e IVA confirmados no editor. Usar IVA normal quando faltar consumo global suficiente e assinalar estimativa. PDF.js local com confirmação e sem persistir PDF. Preferências e horários no backup. Ver ENERGIA-TARIFARIOS.md e tests/energy-cost.test.cjs. Testar só com dados fictícios.
