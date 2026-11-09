@@ -5,7 +5,11 @@
   overflow: auto;
 }
 .energy-tariff-dialog h2 { padding-inline-end: 52px; }
-.energy-tariff-access { margin-top: 12px; }
+#energy-settings-actions,
+.energy-tariff-dialog .backup-actions { margin-top: 12px; }
+#energy-settings-actions > button,
+.energy-tariff-dialog .backup-actions > button { flex-basis: 130px; }
+.energy-tariff-dialog .backup-actions > button:disabled { opacity: .55; cursor: default; }
 .energy-field-grid { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 8px; }
 .energy-tariff-dialog label { display: block; font-size: 12px; }
 .energy-tariff-dialog input:not([type=checkbox]) {
@@ -37,12 +41,28 @@
   font-weight: 600;
   line-height: 1.25;
   text-align: left;
-  text-decoration: underline dotted;
-  text-underline-offset: 2px;
+  text-decoration: none;
 }
+[data-daily-energy-units="false"]:empty + small { display: none; }
 .energy-tariff-dialog [hidden], .energy-cost-value[hidden] { display: none !important; }
 .energy-tariff-dialog dl { display: grid; grid-template-columns: 1fr auto; gap: 8px; font-size: 13px; }
 .energy-tariff-dialog dd { margin: 0; text-align: right; }
+
+.history-sync-dialog .energy-check {
+  min-height: 44px;
+  gap: 10px;
+}
+.history-sync-dialog .energy-check input[type="checkbox"] {
+  box-sizing: border-box;
+  flex: 0 0 18px;
+  width: 18px;
+  height: 18px;
+  min-height: 18px;
+  margin: 0;
+  padding: 0;
+  accent-color: #426e8c;
+}
+.history-sync-dialog .backup-actions > button { flex: 0 1 auto; }
 
 .history-sync-warning {
   margin: 12px 0 16px;

@@ -11,14 +11,12 @@
   let client, session, busy = false;
   let downloaded = 0, sent = 0;
   let syncAgain = false;
-  let manualSyncQueued = false;
   let pendingRelease;
   let status = 'Inicia sessão para consultar o histórico partilhado.';
 
-  const settings = document.getElementById('settings-dialog');
+  const settings = document.getElementById('energy-settings-actions');
   const access = document.createElement('button');
   access.type = 'button';
-  access.className = 'secondary-action energy-tariff-access';
   access.textContent = 'Sincronizar histórico';
   settings.append(access);
 
@@ -41,7 +39,7 @@
   const roleLabel = indicator.querySelector('small');
 
   const dialog = document.createElement('dialog');
-  dialog.className = 'energy-tariff-dialog popup';
+  dialog.className = 'energy-tariff-dialog history-sync-dialog popup';
   dialog.setAttribute('aria-labelledby', 'history-sync-title');
   dialog.innerHTML = `
     <button type="button" class="energy-tariff-close" aria-label="Fechar">×</button>
@@ -50,7 +48,7 @@
       ${fromFile ? '<p class="energy-hint">Neste ficheiro local, a sessão dura enquanto a página estiver aberta. Para guardar a sessão, abre a app por HTTPS ou localhost.</p>' : ''}
       <label>Email <input type="email" autocomplete="username" required></label>
       <label>Palavra-passe <input type="password" autocomplete="current-password" required></label>
-      <button class="primary-action">Iniciar sessão</button>
+      <div class="backup-actions"><button type="submit" class="primary">Iniciar sessão</button></div>
     </form>
     <div data-signed-in hidden>
       <div class="history-sync-warning" hidden>
@@ -58,12 +56,14 @@
           <strong>Já existe um emissor nesta casa</strong>
           <p>O Supabase recusou o envio deste dispositivo. Desativa a recolha no outro dispositivo ou tenta novamente após 6 minutos sem contacto do emissor.</p>
         </div>
-        <button type="button" data-dismiss-writer-warning class="secondary-action">Dispensar aviso</button>
+        <div class="backup-actions"><button type="button" data-dismiss-writer-warning>Dispensar aviso</button></div>
       </div>
       <label class="energy-check"><input type="checkbox"> Usar este dispositivo para recolher e enviar o histórico</label>
       <p class="energy-hint">Ativa esta opção apenas no dispositivo que guarda o histórico desta casa. Ao ativar, envias os registos de consumo para o Supabase.</p>
-      <button type="button" data-refresh class="secondary-action">Sincronizar agora</button>
-      <button type="button" data-sign-out class="secondary-action">Terminar sessão</button>
+      <div class="backup-actions">
+        <button type="button" data-refresh class="primary">Sincronizar agora</button>
+        <button type="button" data-sign-out>Terminar sessão</button>
+      </div>
     </div>
     <p data-writer-status aria-live="polite" hidden></p>
     <p role="status"></p>`;
@@ -154,8 +154,7 @@
     return data;
   }
 
-  async function sync(manual = false) {
-    manual = manual === true;
+  async function sync() {
     if (!session) return;
     if (!navigator.onLine) {
       clearSyncConfirmation();
@@ -165,7 +164,6 @@
     }
     if (busy) {
       syncAgain = true;
-      manualSyncQueued ||= manual;
       return;
     }
     busy = true;
@@ -233,7 +231,8 @@
         daily.setSharedHistory(record.snapshot);
         downloaded = record.reading_at;
       }
-      if (manual || !writer?.conflict) indicator.dataset.syncOk = 'true';
+      // A previous publishing conflict does not invalidate a successful download.
+      indicator.dataset.syncOk = 'true';
       paint('Histórico partilhado atualizado em ' + new Date(row.updated_at).toLocaleString('pt-PT', {timeZone:'Europe/Lisbon'}) + '.');
     } catch {
       if (stillSignedIn()) {
@@ -246,9 +245,7 @@
       indicator.removeAttribute('aria-busy');
       if (syncAgain) {
         syncAgain = false;
-        const queuedManual = manualSyncQueued;
-        manualSyncQueued = false;
-        setTimeout(() => sync(queuedManual), 0);
+        setTimeout(sync, 0);
       }
     }
   }
@@ -258,7 +255,7 @@
     if (connect()) sync();
   }
   access.addEventListener('click', openSyncDialog);
-  indicator.addEventListener('click', () => sync(true));
+  indicator.addEventListener('click', sync);
   dialog.querySelector('.energy-tariff-close').addEventListener('click', () => dialog.close());
   function signInError(error) {
     if (!navigator.onLine) return 'Sem ligação à Internet. Tenta novamente quando estiveres online.';
@@ -319,7 +316,7 @@
   }
 
   dialog.querySelector('[data-dismiss-writer-warning]').addEventListener('click', dismissWriterWarning);
-  dialog.querySelector('[data-refresh]').addEventListener('click', () => sync(true));
+  dialog.querySelector('[data-refresh]').addEventListener('click', sync);
   dialog.querySelector('[data-sign-out]').addEventListener('click', async () => {
     const {error} = await client.auth.signOut({scope:'local'});
     if (error) paint('Não foi possível terminar a sessão.');
