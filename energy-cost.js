@@ -58,7 +58,7 @@
         </label>
       </div>
       <p class="energy-hint">Vazio das 22:00 às 08:00 e fora de vazio das 08:00 às 22:00, pela hora de Portugal continental.</p>
-      <button type="submit" class="primary-action">Guardar preços</button>
+      <div class="backup-actions"><button type="submit" class="primary">Guardar preços</button></div>
     </form>
     <p id="energy-tariff-status" role="status"></p>`;
   editor.append(panel);
@@ -92,8 +92,8 @@
   $('energy-show-euros').addEventListener('change', event => {
     if (!save({...config, enabled:event.target.checked}, 'Preferência guardada.')) event.target.checked = config.enabled;
   });
-  const access = button('Energia e Tarifários','secondary-action energy-tariff-access');
-  const settings = document.querySelector('#settings-dialog');
+  const access = button('Energia e Tarifários');
+  const settings = document.querySelector('#energy-settings-actions');
   settings?.append(access);
   access.addEventListener('click', () => {
     $('energy-show-euros').checked = config.enabled;
@@ -110,7 +110,7 @@
     const days = D.timedHistory(role,id,start,end).days;
     const result = C.calculate({days,start,end,config:{dailyRates:rates},today});
     if (result.total !== null) return result;
-    if (today < start || today > end) return result;
+    if (today < start || today > end || D.today(role,id).unavailable) return result;
     const watts = D.power(role,id);
     if (watts === null) return result;
     return {quality:'estimated', total:watts / 1000 * C.dailyAverage(rates), hourly:true, watts, rates};
@@ -143,8 +143,7 @@
       }
       const notes = document.createElement('p');
       notes.textContent = 'Só energia, sem IVA, IEC ou encargos fixos.'
-        + (result.unknown ? ' O consumo sem hora usa o preço médio de 10 horas em vazio e 14 horas fora de vazio.' : '')
-        + (result.partial ? ' Registo parcial.' : '');
+        + (result.unknown ? ' O consumo sem hora usa o preço médio de 10 horas em vazio e 14 horas fora de vazio.' : '');
       detailBody.append(table,notes);
     }
     detail.showModal();
@@ -153,7 +152,9 @@
     target.hidden = !config.enabled;
     if (!config.enabled) return;
     const result = cost(role,id,start,end);
-    const amount = result.total === null ? 'Sem registo' : formatCost(result);
+    target.hidden = result.total === null;
+    if (target.hidden) return;
+    const amount = formatCost(result);
     target.textContent = (result.quality === 'estimated' ? '≈ ' : '') + amount
       + (result.hourly ? ' ao ritmo atual' : '');
     target.setAttribute('aria-label','Custo estimado de consumo · ' + (result.reason || amount));
