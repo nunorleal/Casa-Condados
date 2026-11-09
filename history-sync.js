@@ -11,7 +11,6 @@
   let client, session, busy = false;
   let downloaded = 0, sent = 0;
   let syncAgain = false;
-  let manualSyncQueued = false;
   let pendingRelease;
   let status = 'Inicia sessão para consultar o histórico partilhado.';
 
@@ -40,7 +39,7 @@
   const roleLabel = indicator.querySelector('small');
 
   const dialog = document.createElement('dialog');
-  dialog.className = 'energy-tariff-dialog popup';
+  dialog.className = 'energy-tariff-dialog history-sync-dialog popup';
   dialog.setAttribute('aria-labelledby', 'history-sync-title');
   dialog.innerHTML = `
     <button type="button" class="energy-tariff-close" aria-label="Fechar">×</button>
@@ -155,8 +154,7 @@
     return data;
   }
 
-  async function sync(manual = false) {
-    manual = manual === true;
+  async function sync() {
     if (!session) return;
     if (!navigator.onLine) {
       clearSyncConfirmation();
@@ -166,7 +164,6 @@
     }
     if (busy) {
       syncAgain = true;
-      manualSyncQueued ||= manual;
       return;
     }
     busy = true;
@@ -234,7 +231,8 @@
         daily.setSharedHistory(record.snapshot);
         downloaded = record.reading_at;
       }
-      if (manual || !writer?.conflict) indicator.dataset.syncOk = 'true';
+      // A previous publishing conflict does not invalidate a successful download.
+      indicator.dataset.syncOk = 'true';
       paint('Histórico partilhado atualizado em ' + new Date(row.updated_at).toLocaleString('pt-PT', {timeZone:'Europe/Lisbon'}) + '.');
     } catch {
       if (stillSignedIn()) {
@@ -247,9 +245,7 @@
       indicator.removeAttribute('aria-busy');
       if (syncAgain) {
         syncAgain = false;
-        const queuedManual = manualSyncQueued;
-        manualSyncQueued = false;
-        setTimeout(() => sync(queuedManual), 0);
+        setTimeout(sync, 0);
       }
     }
   }
@@ -259,7 +255,7 @@
     if (connect()) sync();
   }
   access.addEventListener('click', openSyncDialog);
-  indicator.addEventListener('click', () => sync(true));
+  indicator.addEventListener('click', sync);
   dialog.querySelector('.energy-tariff-close').addEventListener('click', () => dialog.close());
   function signInError(error) {
     if (!navigator.onLine) return 'Sem ligação à Internet. Tenta novamente quando estiveres online.';
@@ -320,7 +316,7 @@
   }
 
   dialog.querySelector('[data-dismiss-writer-warning]').addEventListener('click', dismissWriterWarning);
-  dialog.querySelector('[data-refresh]').addEventListener('click', () => sync(true));
+  dialog.querySelector('[data-refresh]').addEventListener('click', sync);
   dialog.querySelector('[data-sign-out]').addEventListener('click', async () => {
     const {error} = await client.auth.signOut({scope:'local'});
     if (error) paint('Não foi possível terminar a sessão.');

@@ -48,6 +48,22 @@
 .energy-tariff-dialog dl { display: grid; grid-template-columns: 1fr auto; gap: 8px; font-size: 13px; }
 .energy-tariff-dialog dd { margin: 0; text-align: right; }
 
+.history-sync-dialog .energy-check {
+  min-height: 44px;
+  gap: 10px;
+}
+.history-sync-dialog .energy-check input[type="checkbox"] {
+  box-sizing: border-box;
+  flex: 0 0 18px;
+  width: 18px;
+  height: 18px;
+  min-height: 18px;
+  margin: 0;
+  padding: 0;
+  accent-color: #426e8c;
+}
+.history-sync-dialog .backup-actions > button { flex: 0 1 auto; }
+
 .history-sync-warning {
   margin: 12px 0 16px;
   padding: 12px;
