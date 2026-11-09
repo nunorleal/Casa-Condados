@@ -29,7 +29,9 @@ body #room-dialog .room-device-row p:empty,body #room-dialog .room-feedback:empt
 
 /* One closing control: align its right edge with content and draw a centered X. */
 body dialog{--popup-inline-padding:17px}
-body dialog .close,body dialog.shelly-device-popup .close,body #blind-dialog .close,body #room-dialog .close{box-sizing:border-box;position:absolute;top:12px;right:var(--popup-inline-padding);width:44px;height:44px;min-width:44px;min-height:44px;margin:0;padding:0;display:grid;place-items:center;line-height:1;font-size:0;border:2px solid #426e8c;border-radius:50%;background:#e9eff5;color:#63849c;box-shadow:inset 0 0 0 3px #fbfcf9}
-body dialog .close::before,body dialog .close::after{content:"";position:absolute;left:50%;top:50%;width:18px;height:2px;border-radius:2px;background:currentColor;pointer-events:none;transform:translate(-50%,-50%) rotate(45deg)}body dialog .close::after{transform:translate(-50%,-50%) rotate(-45deg)}
-body dialog .close:focus-visible{outline:2px solid #87b8d8;outline-offset:2px}
+body dialog .close,body dialog.shelly-device-popup .close,body #blind-dialog .close,body #room-dialog .close,body dialog :is(.energy-tariff-close,.energy-history-close,.room-power-close){box-sizing:border-box;position:absolute;top:12px;right:var(--popup-inline-padding);width:44px;height:44px;min-width:44px;min-height:44px;margin:0;padding:0;display:grid;place-items:center;line-height:1;font-size:0;border:2px solid #426e8c;border-radius:50%;background:#e9eff5;color:#63849c;box-shadow:inset 0 0 0 3px #fbfcf9}
+body dialog .close::before,body dialog :is(.energy-tariff-close,.energy-history-close,.room-power-close)::before,body dialog .close::after,body dialog :is(.energy-tariff-close,.energy-history-close,.room-power-close)::after{content:"";position:absolute;left:50%;top:50%;width:18px;height:2px;border-radius:2px;background:currentColor;pointer-events:none;transform:translate(-50%,-50%) rotate(45deg)}body dialog .close::after,body dialog :is(.energy-tariff-close,.energy-history-close,.room-power-close)::after{transform:translate(-50%,-50%) rotate(-45deg)}
+body dialog .close:focus-visible,body dialog :is(.energy-tariff-close,.energy-history-close,.room-power-close):focus-visible{outline:2px solid #87b8d8;outline-offset:2px}
 @media(max-width:360px){body dialog{--popup-inline-padding:12px}}
+
+body dialog .room-power-close svg{display:none}
