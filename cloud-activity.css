@@ -12,3 +12,25 @@ body .cloud-activity-popup h2{font-size:22px}body .cloud-activity-popup #cloud-a
 
 /* Reserve only the rail and two 10 px side gaps for the fitted plan. */
 body #plan-stage{left:calc(var(--side-rail-left) + var(--cloud-rail-width) + 10px);right:max(10px,env(safe-area-inset-right))}
+
+.cloud-activity-popup > .eyebrow {
+  display: block;
+  padding-inline-end: 102px;
+}
+.cloud-activity-popup #cloud-activity-refresh {
+  position: absolute;
+  top: 12px;
+  right: calc(var(--popup-inline-padding) + 58px);
+  display: grid;
+  place-items: center;
+  box-sizing: border-box;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 1px solid #c8dbe5;
+  border-radius: 50%;
+  background: #e9eff5;
+  color: #426e8c;
+}
+.cloud-activity-popup #cloud-activity-refresh svg { width: 22px; height: 22px; }
+.cloud-activity-popup #cloud-activity-refresh:disabled { opacity: .55; }
