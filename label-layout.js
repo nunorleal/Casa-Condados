@@ -35,9 +35,10 @@
  function mount(b,floor,room){
   const entry={floor,room,suppressUntil:0};entries.set(b,entry);
   const initial=saved[floor]?.[room.id]||room;b.dataset.x=initial.x;b.dataset.y=initial.y;
-  b.title='Arraste para mover dentro da divisão. Alt + setas também permite mover.';
+  b.title='Mantenha pressionado para desbloquear e mover. Alt + Enter desbloqueia e Alt + setas move.';
   b.addEventListener('click',e=>{if(performance.now()<entry.suppressUntil){e.preventDefault();e.stopImmediatePropagation()}},true);
-  b.addEventListener('pointerdown',e=>{
+  b.addEventListener('pointerdown',e=>{if(e.isPrimary&&e.button===0)entry.suppressUntil=0});
+  window.CasaPlanMove.bindItem(b,e=>{
    if(active||!e.isPrimary||(e.pointerType==='mouse'&&e.button!==0)||document.querySelector('dialog[open]')||window.CasaMeteoBridge?.visible())return;
    const stage=document.getElementById('plan-stage'),svg=stage.querySelector('svg');
    if(!svg)return;
@@ -64,7 +65,7 @@
   b.addEventListener('lostpointercapture',e=>finish(e,true));
   b.addEventListener('keydown',e=>{
    const delta={ArrowLeft:[-10,0],ArrowRight:[10,0],ArrowUp:[0,-10],ArrowDown:[0,10]}[e.key];
-   if(!e.altKey||!delta||active)return;
+   if(!e.altKey||!delta||active||!window.CasaPlanMove.isUnlocked(b))return;
    e.preventDefault();e.stopPropagation();
    const stage=document.getElementById('plan-stage'),v=viewport(stage,stage.querySelector('svg')),start={x:Number(b.dataset.x),y:Number(b.dataset.y)};
    put(b,C.constrain(room,start,{x:start.x+delta[0]/v.scale,y:start.y+delta[1]/v.scale},{width:b.getBoundingClientRect().width/v.scale,height:b.getBoundingClientRect().height/v.scale}),v);store(entry,b);
