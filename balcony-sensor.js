@@ -20,7 +20,7 @@
   const text=format(t,' °C')+' · '+format(h,' %'),quality=(t!==null||h!==null)&&!fresh?'Última leitura':!r?'Por consultar':t===null&&h===null?'Indisponível':'';
   badge.querySelector('strong').textContent=text;const small=badge.querySelector('small');small.textContent=quality;small.hidden=!quality;
   badge.setAttribute('aria-label',name+' · Temperatura '+format(t,' graus Celsius')+' · Humidade '+format(h,' por cento')+(quality?' · '+quality:''));
-  badge.title='Duplo clique para editar o nome. Arraste para mover. F2 também permite editar.'+(r?.fetchedAt?' Consultado na Cloud às '+new Date(r.fetchedAt).toLocaleTimeString('pt-PT'):'');
+  badge.title='Duplo clique para editar o nome. Mantenha pressionado para desbloquear e mover. F2 também permite editar.'+(r?.fetchedAt?' Consultado na Cloud às '+new Date(r.fetchedAt).toLocaleTimeString('pt-PT'):'');
   }position();
  }
  function position(){

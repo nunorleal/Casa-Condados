@@ -24,3 +24,13 @@ dialog .check-row{display:flex;align-items:center;justify-content:space-between;
 .backup-settings .check-row[hidden]{display:none}
 
 .backup-settings [hidden]{display:none}
+
+.names-hidden #plan-stage .ev-badge,
+.names-hidden .balcony-sensor-badge > span:first-child {
+  display: none;
+}
+
+/* A single item can be repositioned after a long press. */
+.plan-movable{-webkit-touch-callout:none}
+:root .plan-movable:not(.plan-move-unlocked){cursor:pointer}
+:root .plan-movable.plan-move-unlocked:not(.dragging){cursor:grab;outline:2px dashed #ffc86c;outline-offset:4px}

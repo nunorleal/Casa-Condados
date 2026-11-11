@@ -19,7 +19,11 @@ dialog.shelly-device-popup .device-meter-grid small{font-size:12px;color:#78928a
 dialog.shelly-device-popup .device-meter-grid small[id]{display:block;font-size:10px;margin-top:6px}
 dialog.shelly-device-popup .device-meter-grid small:empty{display:none}
 .device-information{border-top:1px solid #dce6eb;margin:15px 0 0;padding-top:5px;color:#63849c;font-size:11px}.device-information>summary{cursor:pointer;min-height:44px;display:flex;align-items:center;list-style:revert}.device-information .demo-note{background:transparent;padding:0;margin:6px 0}
-.device-tv-preview{width:144px;height:100px;margin:27px auto 25px}.device-tv-preview svg{width:100%;height:100%;fill:#283c46;stroke:#5e737f;stroke-width:2}.device-tv-preview .device-tv-screen{fill:#131c26;stroke:none}#tv-dialog[data-activity=on] .device-tv-screen{fill:#3f6887}#tv-dialog[data-activity=regenerating] .device-tv-screen{fill:#554d31}
+.device-tv-preview{width:144px;height:100px;margin:27px auto 25px}.device-tv-preview svg{width:100%;height:100%;fill:#283c46;stroke:#5e737f;stroke-width:2}.device-tv-preview .device-tv-screen{fill:#090c0e;stroke:none}
+.device-tv-picture,.device-tv-maintenance{display:none}
+#tv-dialog[data-activity=on] .device-tv-picture{display:inline}
+#tv-dialog[data-activity=regenerating] .device-tv-screen{fill:#2a2118}
+#tv-dialog[data-activity=regenerating] .device-tv-maintenance{display:inline;fill:none;stroke:#ffdc9b;stroke-linecap:round;stroke-linejoin:round}
 #tv-dialog.shelly-device-popup #tv-state{font-size:13px}#tv-dialog.shelly-device-popup[data-activity=on] #tv-state{color:#27804c}#tv-dialog.shelly-device-popup[data-activity=regenerating] #tv-state{color:#9c761a}
 dialog.shelly-device-popup .heater-preview,dialog.shelly-device-popup .dehumidifier-preview{width:135px;height:115px;margin:21px auto 19px}
 dialog.shelly-device-popup .heater-power-row,dialog.shelly-device-popup .dehumidifier-power-row{gap:12px;margin:15px 0}
