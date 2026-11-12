@@ -29,8 +29,8 @@
    loading.hidden=false;loadTimer=setTimeout(()=>{loadMessage.textContent='Não foi possível carregar a MeteoNL. Volte à casa e atualize a página.'},15000);
    if(location.protocol==='file:'){
     const base=new URL('meteo/',document.baseURI).href.replace(/&/g,'&amp;').replace(/"/g,'&quot;');
-    frame.srcdoc=`<!doctype html><html lang="pt"><head><meta charset="utf-8"><base href="${base}"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>MeteoNL · Casa NL</title><link rel="stylesheet" href="assets/app-2.96.css?v=2.96-morning"></head><body><div id="root"></div><script src="assets/app-2.96.js?v=2.96-morning"><\/script></body></html>`;
-   }else frame.src='meteo/index.html?v=2.96';
+    frame.srcdoc=`<!doctype html><html lang="pt"><head><meta charset="utf-8"><base href="${base}"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>MeteoNL · Casa NL</title><link rel="stylesheet" href="assets/app-2.97.css?v=2.97-morning"></head><body><div id="root"></div><script src="assets/app-2.97.js?v=2.97-morning"><\/script></body></html>`;
+   }else frame.src='meteo/index.html?v=2.97';
    loaded=true;
   }
   window.CasaShelly?.ensureFresh('master');window.CasaCloudRead?.ensureTemperatureFresh();refreshIndoorSensor();frame.focus();
@@ -39,6 +39,41 @@
   host.hidden=true;document.documentElement.classList.remove('meteo-visible');document.getElementById('casa-app')?.removeAttribute('inert');idle.setActive(true);
   if(restore){savedDialogs.filter(d=>d.isConnected).slice(-1).forEach(d=>d.showModal());lastFocus?.focus?.()}
   savedDialogs=[];window.dispatchEvent(new Event('casahomevisible'));
+ }
+ function openRoomActivity(floor,room,id){
+  window.CasaRooms.open(floor,room);
+  const row=document.querySelector(`#room-dialog[open] [data-room-media-role="${id}"]`);
+  if(row){
+   row.tabIndex=-1;
+   row.focus({preventScroll:true});
+   row.scrollIntoView({block:'nearest'});
+  }
+ }
+ const activityTargets={
+  tv:()=>['3',window.CasaTV?.open],
+  playstation:()=>['3',()=>openRoomActivity('3','living','playstation')],
+  soundbar:()=>['3',()=>openRoomActivity('3','living','soundbar')],
+  vodafone:()=>['3',()=>openRoomActivity('3','living','vodafone')],
+  unifi:()=>['3',()=>openRoomActivity('3','living','unifi')],
+  monitor:()=>['4',()=>openRoomActivity('4','studio','monitor')],
+  apollo:()=>['4',()=>openRoomActivity('4','studio','apollo')],
+  terramaster:()=>['4',()=>openRoomActivity('4','studio','terramaster')],
+  blackdrive:()=>['4',()=>openRoomActivity('4','studio','backup')],
+  washer:()=>['3',()=>window.CasaBalconyAppliances.open('washer')],
+  dishwasher:()=>['3',window.CasaDishwasher?.open],
+  boiler:()=>['3',()=>window.CasaBalconyAppliances.open('boiler')],
+  heater:()=>[window.CasaHeater?.snapshot().floor,window.CasaHeater?.open],
+  dehumidifier:()=>[window.CasaDehumidifier?.snapshot().floor,window.CasaDehumidifier?.open],
+  ev:()=>['-1',window.CasaEVRead?.open],
+ };
+ function openActivityDevice(id){
+  if(host.hidden||!Object.hasOwn(activityTargets,id))return false;
+  const [floor,openDevice]=activityTargets[id]();
+  if(typeof openDevice!=='function')return false;
+  home(false);
+  if(window.CasaFloors.current()!==floor)window.CasaFloors.show(floor);
+  openDevice();
+  return true;
  }
  function settings(){home(false);window.CasaShellySetup.open()}
  function toggleLamp(){return CasaMeteoCore.lampAction(window.CasaShelly,settings)}
@@ -60,6 +95,7 @@
  function refreshIndoorSensor(id=selectedIndoorSensor()){if(!indoorSensors().some(sensor=>sensor.id===id&&sensor.configured))return;window.CasaCloudRead?.ensureTemperatureFresh(id)}
  window.CasaMeteoBridge={visible:()=>!host.hidden,preferences:CasaMeteoCore.preferences,ready,open,home:()=>home(),settings,toggleLamp,openMorningBlind,
   activityDevices:()=>window.CasaMeteoActivity?.devices()||[],
+  openActivityDevice,
   activitySnapshot:()=>window.CasaMeteoActivity?.snapshot()||[],
   indoorSensors,selectIndoorSensor,
   bedroomClimate:()=>CasaMeteoCore.indoorClimate(selectedIndoorSensor(),indoorSensors(),id=>window.CasaCloudRead?.temperatureSnapshot(id)?.reading),
