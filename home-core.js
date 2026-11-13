@@ -79,8 +79,22 @@
   const token=id.toLowerCase()+':'+v.channel;if(!contact&&used.has(token))throw Error('O mesmo ID e canal não pode controlar dois equipamentos.');if(!contact)used.add(token);
   return contact?{deviceId:id,channel:v.channel,source:v.source}:{deviceId:id,channel:v.channel,type:v.type};
  }
+ const KITCHEN_METERS={hob:'Placa de indução AEG',oven:'Forno / micro-ondas AEG'};
+ function kitchenMeterConfig(value){
+  obj(value,Object.keys(KITCHEN_METERS));
+  const result={},pairs=new Set();
+  for(const [id,b] of Object.entries(value)){
+   obj(b,['deviceId','channel']);
+   const idValue=deviceId(b.deviceId),channel=b.channel,pair=idValue+':'+channel;
+   if(channel!==0&&channel!==1)throw Error('O Shelly EM usa os canais 0 e 1.');
+   if(pairs.has(pair))throw Error('O canal do Shelly EM já está associado na cozinha.');
+   pairs.add(pair);
+   result[id]={deviceId:idValue,channel};
+  }
+  return result;
+ }
  function setup(v,plans){
-  obj(v,['fan','studioBindings','mediaBindings','balconyMeters','dishwasherMeter','dehumidifier','heater','tvMeter','server','lights','blinds','entranceContact','gateContact','windowContacts','alarm','homeEnergy','evMeter','meteoSensor','garageSensor','livingSensor','masterSensor']);const out={server:server(v.server),lights:{},blinds:{},entranceContact:null},used=new Set();obj(v.lights,roomKeys(plans));obj(v.blinds,WINDOWS.map(w=>w.id));
+  obj(v,['fan','studioBindings','mediaBindings','balconyMeters','kitchenMeters','dishwasherMeter','dehumidifier','heater','tvMeter','server','lights','blinds','entranceContact','gateContact','windowContacts','alarm','homeEnergy','evMeter','meteoSensor','garageSensor','livingSensor','masterSensor']);const out={server:server(v.server),lights:{},blinds:{},entranceContact:null},used=new Set();obj(v.lights,roomKeys(plans));obj(v.blinds,WINDOWS.map(w=>w.id));
   for(const [k,b]of Object.entries(v.lights)){const x=binding(b,used);if(x.type==='cover')throw Error('Tipo de luz inválido.');out.lights[k]=x}
   for(const [k,b]of Object.entries(v.blinds)){const x=binding(b,used);if(x.type!=='cover')throw Error('Tipo de estore inválido.');out.blinds[k]=x}
   if(v.entranceContact!==null&&v.entranceContact!==undefined)out.entranceContact=binding(v.entranceContact,used,true);
@@ -92,6 +106,7 @@
   if(v.studioBindings!==undefined){obj(v.studioBindings,['monitor','apollo','terramaster','backup']);out.studioBindings={};for(const [role,b]of Object.entries(v.studioBindings))out.studioBindings[role]=b===null?null:Heater.config(b,used)}
   if(v.mediaBindings!==undefined){obj(v.mediaBindings,['vodafone','soundbar','playstation','unifi']);out.mediaBindings={};for(const [role,b]of Object.entries(v.mediaBindings))out.mediaBindings[role]=b===null?null:Heater.config(b,used)}
   if(v.balconyMeters!==undefined){obj(v.balconyMeters,['washer','boiler']);out.balconyMeters={};for(const [role,b]of Object.entries(v.balconyMeters))out.balconyMeters[role]=b===null?null:Heater.config(b,used)}
+  if(v.kitchenMeters!==undefined)out.kitchenMeters=kitchenMeterConfig(v.kitchenMeters);
   if(v.dishwasherMeter!==undefined)out.dishwasherMeter=v.dishwasherMeter===null?null:Heater.config(v.dishwasherMeter,used);
   if(v.homeEnergy!==undefined){if(v.homeEnergy===null)out.homeEnergy=null;else{obj(v.homeEnergy,['source','deviceId','channel','contractKVA']);if(v.homeEnergy.source!=='custom')throw Error('Associe explicitamente o Shelly EM desta casa.');out.homeEnergy=Energy.config(v.homeEnergy,deviceId)}}
   if(v.evMeter!==undefined){if(v.evMeter===null)out.evMeter=null;else{obj(v.evMeter,['deviceId','channel']);const checked=Energy.config({source:'custom',...v.evMeter,contractKVA:6.9},deviceId);out.evMeter={deviceId:checked.deviceId,channel:checked.channel}}}
@@ -109,5 +124,5 @@
  function moveGuiBulbToStudio(previous={},fallbackId='98cdac1f18fa'){const next={...previous};if(previous['3:bedroom2'])next['4:studio']={...previous['3:bedroom2']};else if(!next['4:studio'])next['4:studio']={deviceId:fallbackId,channel:0,type:'light'};delete next['3:bedroom2'];return next}
  function associateBulbs(previous={}){const next=moveGuiBulbToStudio(previous);for(const [room,deviceId]of Object.entries(SUPPLIED_BULBS)){const old=next[room];next[room]={deviceId,channel:old?.deviceId?.toLowerCase()===deviceId?old.channel:0,type:'light'}}return next}
  function emptySetup(){return {server:'',lights:{},blinds:{},entranceContact:null}}
- return {DEMO_BLIND_LINKS,WINDOWS,key,roomKeys,demo,defaults,position,light,opacity,lighting,beam,beamOpacity,setup,emptySetup,SUPPLIED_BULBS,moveGuiBulbToStudio,associateBulbs,server,windowContactsConfig:Windows.config};
+ return {KITCHEN_METERS,kitchenMeterConfig,DEMO_BLIND_LINKS,WINDOWS,key,roomKeys,demo,defaults,position,light,opacity,lighting,beam,beamOpacity,setup,emptySetup,SUPPLIED_BULBS,moveGuiBulbToStudio,associateBulbs,server,windowContactsConfig:Windows.config};
 });

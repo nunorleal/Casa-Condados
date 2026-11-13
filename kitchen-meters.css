@@ -1,0 +1,16 @@
+.kitchen-meter-hit{cursor:pointer;outline:none}
+.kitchen-meter-halo,.kitchen-meter-badge{pointer-events:none}
+.kitchen-meter-halo{opacity:0;stroke:#87c7f0;stroke-width:1.5;fill:#68baf022}
+.kitchen-meter-hit:is(:hover,:focus-visible) .kitchen-meter-halo{opacity:1}
+.kitchen-meter-badge{display:none;color:#c4e6ff}
+.kitchen-meter-hit:is(:hover,:focus-visible,[data-working=true]) .kitchen-meter-badge{display:block}
+.kitchen-meter-badge>rect{fill:#223e52eb;stroke:currentColor}
+.kitchen-meter-badge svg{fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round}
+.kitchen-meter-badge text{display:none;fill:currentColor;font-size:11px;font-weight:700;stroke:#173346;stroke-width:3px;stroke-linejoin:round;paint-order:stroke}
+.kitchen-meter-hit[data-working=true] .kitchen-meter-badge{color:#bdfbe0}
+.kitchen-meter-hit[data-working=true] .kitchen-meter-badge>rect{fill:#163b31e8}
+.kitchen-meter-hit[data-working=true] .kitchen-meter-badge text{display:block}
+#kitchen-meter-dialog{width:min(430px,calc(100vw - 24px));padding:25px 22px 20px}
+#kitchen-meter-dialog h2{font-size:24px;padding-right:30px}
+.kitchen-meter-preview{display:block;width:min(190px,70%);height:150px;object-fit:contain;margin:8px auto}
+.kitchen-meter-room-row .room-round svg{fill:none;stroke:currentColor;stroke-width:1.7}

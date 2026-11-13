@@ -61,7 +61,7 @@
   if(!restoreCredentials)delete clean.data.shellyCredentials;
   if(clean.data.shellyCredentials?.encrypted)throw Error('Introduza a palavra-passe do backup antes de restaurar a chave.');
   if(clean.data.shellySetup){
-   try{const current=Home.setup(JSON.parse(storage.getItem(KEYS.shellySetup)),plans);if(current.server===clean.data.shellySetup.server)for(const key of ['fan','studioBindings','mediaBindings','balconyMeters','dishwasherMeter','dehumidifier','heater','tvMeter','homeEnergy','evMeter','entranceContact','gateContact','windowContacts','alarm','meteoSensor','garageSensor','livingSensor','masterSensor'])if(clean.data.shellySetup[key]===undefined&&current[key]!==undefined)clean.data.shellySetup[key]=current[key]}catch{}
+   try{const current=Home.setup(JSON.parse(storage.getItem(KEYS.shellySetup)),plans);if(current.server===clean.data.shellySetup.server)for(const key of ['fan','studioBindings','mediaBindings','balconyMeters','kitchenMeters','dishwasherMeter','dehumidifier','heater','tvMeter','homeEnergy','evMeter','entranceContact','gateContact','windowContacts','alarm','meteoSensor','garageSensor','livingSensor','masterSensor'])if(clean.data.shellySetup[key]===undefined&&current[key]!==undefined)clean.data.shellySetup[key]=current[key]}catch{}
   }
   if(clean.data.shellySetup)clean.data.shellySetup=Home.setup(clean.data.shellySetup,plans);
   if(clean.data.bannerScale===undefined&&(clean.data.sensorBannerScale!==undefined||clean.data.blindBannerScale!==undefined))clean.data.bannerScale=clean.data.sensorBannerScale??clean.data.blindBannerScale;

@@ -61,6 +61,8 @@
   blackdrive:()=>['4',()=>openRoomActivity('4','studio','backup')],
   washer:()=>['3',()=>window.CasaBalconyAppliances.open('washer')],
   dishwasher:()=>['3',window.CasaDishwasher?.open],
+  hob:()=>['3',()=>window.CasaKitchenMeters.open('hob')],
+  oven:()=>['3',()=>window.CasaKitchenMeters.open('oven')],
   boiler:()=>['3',()=>window.CasaBalconyAppliances.open('boiler')],
   heater:()=>[window.CasaHeater?.snapshot().floor,window.CasaHeater?.open],
   dehumidifier:()=>[window.CasaDehumidifier?.snapshot().floor,window.CasaDehumidifier?.open],

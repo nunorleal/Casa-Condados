@@ -11,6 +11,7 @@
   const s=device?.status||{},i=b.channel,object=v=>v&&typeof v==='object'&&!Array.isArray(v);let candidates=[];
   const add=(family,c)=>{if(object(c))candidates.push({family,c})};
   if(kind==='cover'){add('cover',s['cover:'+i]);if(!candidates.length)add('meter',s.meters?.[i]);}
+  else if(kind==='emeter'){add('emeter',s.emeters?.[i]);}
   else if(kind==='light'){add('light',s['light:'+i]||s.lights?.[i]);if(!candidates.length)add('meter',s.meters?.[i]);}
   else{add('switch',s['switch:'+i]);add('pm1',s['pm1:'+i]);add('meter',s.meters?.[i]);if(kind!=='relay')add('emeter',s.emeters?.[i]);}
   const item=candidates.length===1?candidates[0]:null,c=item?.c,raw=c&&(Object.hasOwn(c,'apower')?c.apower:c.power),errors=[...(Array.isArray(s.errors)?s.errors:[]),...(Array.isArray(c?.errors)?c.errors:[])];
