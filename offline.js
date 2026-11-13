@@ -8,6 +8,9 @@
  const dialogs={'heater-dialog':'heater','dehumidifier-dialog':'dehumidifier','tv-dialog':'tv','dishwasher-dialog':'dishwasher','ev-dialog':'ev','energy-dialog':'energy','entrance-dialog':'entrance','gate-dialog':'gate','alarm-dialog':'alarm'};
  function sync(){if(document.hidden)return;for(const [selector,kind]of singles)for(const node of document.querySelectorAll(selector))html(node,{kind},true);
   for(const [selector,kind]of [['.tv-plan-hit','tv'],['.dishwasher-plan-hit','dishwasher']])for(const node of document.querySelectorAll(selector))svg(node,{kind});
+  for(const node of document.querySelectorAll('.kitchen-meter-hit'))svg(node,{kind:'kitchen-meter',id:node.dataset.device});
+  const kitchen=document.getElementById('kitchen-meter-dialog');
+  if(kitchen?.dataset.device)html(kitchen.querySelector('.eyebrow'),{kind:'kitchen-meter',id:kitchen.dataset.device});
   for(const node of document.querySelectorAll('.balcony-appliance-hit'))svg(node,{kind:'balcony-appliance',id:node.dataset.device});
   for(const node of document.querySelectorAll('[data-blind-window]'))svg(node,{kind:'blind-or-window',id:node.dataset.blindWindow});
   for(const node of document.querySelectorAll('.blind-banner'))html(node,{kind:'blind-or-window',id:node.dataset.blind},true);

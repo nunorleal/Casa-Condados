@@ -22,7 +22,7 @@
   if(!Number.isFinite(r.energyKWh)||r.energyKWh<0)return;
   if(ledger.record(key,r.energyKWh,r.fetchedAt)){dirty=true;if(pending===null)pending=setTimeout(flush,1000)}
  }
- function binding(role,id){let c={};try{c=window.CasaShellySetup?.snapshot()||{}}catch{}let b=role==='energy'?c.homeEnergy:role==='ev'?c.evMeter:role==='cover'?c.blinds?.[id]:role==='light'?c.lights?.[id]:role==='alarm'?c.alarm?.[id]:role==='media'||role==='appliance'?({tv:c.tvMeter,dishwasher:c.dishwasherMeter,...c.balconyMeters,...c.mediaBindings,...c.studioBindings})[id]:c[role];if(b)b={...b,...(['energy','ev'].includes(role)?{component:'emeter'}:['cover','light'].includes(role)?{kind:role}:{})};return {server:c.server,b}}
+ function binding(role,id){let c={};try{c=window.CasaShellySetup?.snapshot()||{}}catch{}let b=role==='energy'?c.homeEnergy:role==='ev'?c.evMeter:role==='cover'?c.blinds?.[id]:role==='light'?c.lights?.[id]:role==='alarm'?c.alarm?.[id]:role==='media'||role==='appliance'?({tv:c.tvMeter,dishwasher:c.dishwasherMeter,...c.kitchenMeters,...c.balconyMeters,...c.mediaBindings,...c.studioBindings})[id]:c[role];if(b)b={...b,...((['energy','ev'].includes(role)||role==='appliance'&&Object.hasOwn(c.kitchenMeters||{},id))?{component:'emeter'}:['cover','light'].includes(role)?{kind:role}:{})};return {server:c.server,b}}
  function preferSharedToday(local,remote){
   // The emitter owns the shared daily total. A receiver may have started counting later.
   return remote?.from!=null&&(remote.observed||local?.from==null);

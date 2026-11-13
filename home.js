@@ -178,7 +178,7 @@
   if(room.id==='entrance'){const door=row('Porta de entrada',window.CasaCloudRead?.doorSnapshot().caption||'Estado por confirmar');door.p.dataset.entranceReading='';}
   if(room.id==='stairs3'||room.id==='stairs4'){const nav=document.createElement('button');nav.type='button';nav.className='settings-row';nav.textContent=room.id==='stairs3'?'Subir ao piso 4':'Descer ao piso 3';nav.addEventListener('click',()=>{$('room-dialog').close();document.querySelector('[data-floor="'+(room.id==='stairs3'?'4':'3')+'"]').click()});host.append(nav)}
   if(floor==='3'&&room.id==='balcony-south')window.CasaBalconyAppliances?.decorateRoom(host);
-  if(floor==='3'&&room.id==='kitchen')window.CasaDishwasher?.decorateRoom(host);
+  if(floor==='3'&&room.id==='kitchen'){window.CasaDishwasher?.decorateRoom(host);window.CasaKitchenMeters?.decorateRoom(host)}
   if(floor==='3'&&room.id==='living')window.CasaTV?.decorateRoom(host);window.CasaHeater?.decorateRoom(host,floor,room.id);window.CasaDehumidifier?.decorateRoom(host,floor,room.id);
   const feedback=document.createElement('p');feedback.id='room-feedback';feedback.setAttribute('role','status');feedback.className='room-feedback';host.append(feedback);
   if(floor==='-1'&&room.id==='garage')window.CasaFan?.decorateRoom(host);

@@ -105,6 +105,7 @@
    window.CasaFloor3Render.mount(svg);window.CasaCats?.mount(svg,floorId);
    const entrance=window.CasaPlans['3'].architectureAddon.match(/<g data-door="entrance"[\s\S]*?<\/g><\/g>/)?.[0];
    if(entrance){const layer=document.createElementNS(NS,'g');layer.dataset.addon='render-entrance';layer.setAttribute('pointer-events','none');layer.innerHTML=entrance;const d=window.CasaFloor3Render.ENTRANCE;layer.querySelector('[data-door="entrance"]').setAttribute('transform',`translate(${d.hingeX} ${d.hingeY}) scale(${d.leaf/70})`);layer.querySelector('[data-door-position="closed"]').setAttribute('opacity','0');svg.querySelector(':scope > g').append(layer);syncEntranceDoor()}
+   window.CasaKitchenMeters?.mount(svg);
    return;
   }
   mountCabinets(svg,floorId);
