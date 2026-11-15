@@ -80,3 +80,6 @@ body.room-power-mode #blind-window-controls{visibility:hidden!important;pointer-
 
 /* Composite the dragged appliance without per-event plan layout. */
 .heater-object.dragging,.dehumidifier-object.dragging{will-change:transform}
+
+#shelly-setup-form label.shelly-disable-option{display:flex;align-items:center;gap:8px;min-height:34px;margin:4px 0 8px;cursor:pointer}
+#shelly-setup-form label.shelly-disable-option input[type=checkbox]{appearance:auto;width:18px;height:18px;flex:0 0 18px;margin:0;padding:0;accent-color:#427b93}

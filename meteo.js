@@ -8,6 +8,59 @@
  loading.append(loadMessage,back);host.append(loading);let loadTimer;
  function ready(){clearTimeout(loadTimer);loading.hidden=true}
  let savedDialogs=[],lastFocus=null,loaded=false;
+ let enteredFromFloor=false,floorEnteredAt=0;
+ function openFloor(){
+  if(!host.hidden)return;
+  enteredFromFloor=true;
+  floorEnteredAt=performance.now();
+  open();
+ }
+ function bindFloorReturn(surface){
+  let wheel=0,wheelAt=0,touch=null;
+  const allowed=event=>{
+   if(!enteredFromFloor||host.hidden||performance.now()-floorEnteredAt<650)return false;
+   const doc=event.target.ownerDocument||event.target;
+   return !doc.querySelector?.('dialog[open]')&&
+    !event.target.closest?.('input,textarea,select,[contenteditable],.hourly-scroll,[role="dialog"]');
+  };
+  surface.addEventListener('wheel',event=>{
+   if(!allowed(event)||event.ctrlKey||event.metaKey||event.deltaY<=Math.abs(event.deltaX)){wheel=0;return}
+   const now=performance.now();
+   if(now-wheelAt>350)wheel=0;
+   wheelAt=now;
+   const units=event.deltaMode===1?16:event.deltaMode===2?host.clientHeight:1;
+   wheel+=event.deltaY*units;
+   if(wheel<65)return;
+   event.preventDefault();
+   wheel=0;
+   home();
+  },{passive:false});
+  surface.addEventListener('touchstart',event=>{
+   const first=event.touches[0];
+   touch=allowed(event)&&event.touches.length===1?
+    {id:first.identifier,x:first.clientX,y:first.clientY}:null;
+  },{passive:true});
+  surface.addEventListener('touchcancel',()=>{touch=null},{passive:true});
+  surface.addEventListener('touchend',event=>{
+   const start=touch;
+   touch=null;
+   if(!start||event.touches.length||!allowed(event))return;
+   const end=Array.from(event.changedTouches).find(point=>point.identifier===start.id);
+   if(!end)return;
+   const up=start.y-end.clientY,dx=Math.abs(start.x-end.clientX);
+   if(up>=70&&up>dx*1.4)home();
+  },{passive:true});
+  surface.addEventListener('keydown',event=>{
+   if(event.key!=='PageDown'||event.repeat||!allowed(event))return;
+   event.preventDefault();
+   home();
+  });
+ }
+ bindFloorReturn(host);
+ frame.addEventListener('load',()=>{
+  const doc=frame.contentDocument;
+  if(doc)bindFloorReturn(doc);
+ });
  const screensaverKey='casa-nova-screensaver-v1';let screensaver={seconds:30};
  try{screensaver=CasaMeteoCore.screensaver(JSON.parse(localStorage.getItem(screensaverKey)))}catch{}
  const idle=CasaMeteoCore.idle({delay:screensaver.seconds*1000,onIdle:open,blocked:()=>document.body.classList.contains('room-power-mode')||document.hidden||!!window.CasaDehumidifier?.isDragging()||!!window.CasaHeater?.isDragging()||!!document.getElementById('room-name-dialog')?.open||!!window.CasaCloudRead?.isBusy()||!!window.CasaShelly?.isBusy()||!!window.CasaLabelLayout?.isDragging()||!!window.CasaSensorLayout?.isDragging()||!!window.CasaAlarmLayout?.isDragging()||!!window.CasaEVRead?.layout.isDragging()||!!window.CasaPlanView?.isInteracting()});
@@ -36,9 +89,11 @@
   window.CasaShelly?.ensureFresh('master');window.CasaCloudRead?.ensureTemperatureFresh();refreshIndoorSensor();frame.focus();
  }
  function home(restore=true){
+  const fromFloor=enteredFromFloor;enteredFromFloor=false;
   host.hidden=true;document.documentElement.classList.remove('meteo-visible');document.getElementById('casa-app')?.removeAttribute('inert');idle.setActive(true);
   if(restore){savedDialogs.filter(d=>d.isConnected).slice(-1).forEach(d=>d.showModal());lastFocus?.focus?.()}
-  savedDialogs=[];window.dispatchEvent(new Event('casahomevisible'));
+  savedDialogs=[];
+  if(fromFloor)window.dispatchEvent(new Event('meteofloorreturn'));window.dispatchEvent(new Event('casahomevisible'));
  }
  function openRoomActivity(floor,room,id){
   window.CasaRooms.open(floor,room);
@@ -95,7 +150,7 @@
   refreshIndoorSensor(id);return true;
  }
  function refreshIndoorSensor(id=selectedIndoorSensor()){if(!indoorSensors().some(sensor=>sensor.id===id&&sensor.configured))return;window.CasaCloudRead?.ensureTemperatureFresh(id)}
- window.CasaMeteoBridge={visible:()=>!host.hidden,preferences:CasaMeteoCore.preferences,ready,open,home:()=>home(),settings,toggleLamp,openMorningBlind,
+ window.CasaMeteoBridge={visible:()=>!host.hidden,preferences:CasaMeteoCore.preferences,ready,open,openFloor,home:()=>home(),settings,toggleLamp,openMorningBlind,
   activityDevices:()=>window.CasaMeteoActivity?.devices()||[],
   openActivityDevice,
   activitySnapshot:()=>window.CasaMeteoActivity?.snapshot()||[],

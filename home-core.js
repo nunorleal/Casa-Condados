@@ -93,8 +93,21 @@
   }
   return result;
  }
+ const Disable=typeof module==='object'&&module.exports?require('./shelly-disabled.js'):globalThis.CasaShellyDisabled;
+ function disabledFields(plans){
+  const group=(key,roles)=>roles.map(role=>[key+':'+role,[key,role]]);
+  return Object.fromEntries([
+   ...group('lights',roomKeys(plans)),...group('blinds',WINDOWS.map(w=>w.id)),
+   ...group('windowContacts',WINDOWS.map(w=>w.id)),...group('alarm',['arm','trigger']),
+   ...group('studioBindings',['monitor','apollo','terramaster','backup']),
+   ...group('mediaBindings',['vodafone','soundbar','playstation','unifi']),
+   ...group('balconyMeters',['washer','boiler']),...group('kitchenMeters',Object.keys(KITCHEN_METERS)),
+   ...['fan','christmasTree','dishwasherMeter','dehumidifier','heater','tvMeter','entranceContact','gateContact','homeEnergy','evMeter','meteoSensor','garageSensor','livingSensor','masterSensor'].map(id=>[id,[id]])
+  ]);
+ }
+ function activeSetup(config,plans){return config.disabledShellys?.length?Disable.active(config,disabledFields(plans)):config}
  function setup(v,plans){
-  obj(v,['fan','studioBindings','mediaBindings','balconyMeters','kitchenMeters','dishwasherMeter','dehumidifier','heater','tvMeter','server','lights','blinds','entranceContact','gateContact','windowContacts','alarm','homeEnergy','evMeter','meteoSensor','garageSensor','livingSensor','masterSensor']);const out={server:server(v.server),lights:{},blinds:{},entranceContact:null},used=new Set();obj(v.lights,roomKeys(plans));obj(v.blinds,WINDOWS.map(w=>w.id));
+  obj(v,['disabledShellys','christmasTree','fan','studioBindings','mediaBindings','balconyMeters','kitchenMeters','dishwasherMeter','dehumidifier','heater','tvMeter','server','lights','blinds','entranceContact','gateContact','windowContacts','alarm','homeEnergy','evMeter','meteoSensor','garageSensor','livingSensor','masterSensor']);const out={server:server(v.server),lights:{},blinds:{},entranceContact:null},used=new Set();obj(v.lights,roomKeys(plans));obj(v.blinds,WINDOWS.map(w=>w.id));
   for(const [k,b]of Object.entries(v.lights)){const x=binding(b,used);if(x.type==='cover')throw Error('Tipo de luz inválido.');out.lights[k]=x}
   for(const [k,b]of Object.entries(v.blinds)){const x=binding(b,used);if(x.type!=='cover')throw Error('Tipo de estore inválido.');out.blinds[k]=x}
   if(v.entranceContact!==null&&v.entranceContact!==undefined)out.entranceContact=binding(v.entranceContact,used,true);
@@ -114,15 +127,17 @@
   if(v.garageSensor!==undefined)out.garageSensor=v.garageSensor===null?null:Temperature.config(v.garageSensor);
   for(const role of ['livingSensor','masterSensor'])if(v[role]!==undefined)out[role]=v[role]===null?null:Temperature.config(v[role]);
   if(v.dehumidifier!==undefined)out.dehumidifier=v.dehumidifier===null?null:Dehumidifier.config(v.dehumidifier,used);
+  if(v.christmasTree!==undefined)out.christmasTree=v.christmasTree===null?null:Heater.config(v.christmasTree,used);
   if(v.fan!==undefined)out.fan=v.fan===null?null:Heater.config(v.fan,used);
   if(v.heater!==undefined)out.heater=v.heater===null?null:Heater.config(v.heater,used);
   if(v.tvMeter!==undefined)out.tvMeter=v.tvMeter===null?null:Heater.config(v.tvMeter,used);
   if(v.entranceContact===undefined)delete out.entranceContact;
+  if(v.disabledShellys!==undefined)out.disabledShellys=Disable.normalize(v.disabledShellys,disabledFields(plans));
   return out;
  }
  const SUPPLIED_BULBS={'3:living':'98cdac2d2eb6','4:studio':'98cdac1f18fa','3:master':'98cdac1df7e9'};
  function moveGuiBulbToStudio(previous={},fallbackId='98cdac1f18fa'){const next={...previous};if(previous['3:bedroom2'])next['4:studio']={...previous['3:bedroom2']};else if(!next['4:studio'])next['4:studio']={deviceId:fallbackId,channel:0,type:'light'};delete next['3:bedroom2'];return next}
  function associateBulbs(previous={}){const next=moveGuiBulbToStudio(previous);for(const [room,deviceId]of Object.entries(SUPPLIED_BULBS)){const old=next[room];next[room]={deviceId,channel:old?.deviceId?.toLowerCase()===deviceId?old.channel:0,type:'light'}}return next}
  function emptySetup(){return {server:'',lights:{},blinds:{},entranceContact:null}}
- return {KITCHEN_METERS,kitchenMeterConfig,DEMO_BLIND_LINKS,WINDOWS,key,roomKeys,demo,defaults,position,light,opacity,lighting,beam,beamOpacity,setup,emptySetup,SUPPLIED_BULBS,moveGuiBulbToStudio,associateBulbs,server,windowContactsConfig:Windows.config};
+ return {activeSetup,KITCHEN_METERS,kitchenMeterConfig,DEMO_BLIND_LINKS,WINDOWS,key,roomKeys,demo,defaults,position,light,opacity,lighting,beam,beamOpacity,setup,emptySetup,SUPPLIED_BULBS,moveGuiBulbToStudio,associateBulbs,server,windowContactsConfig:Windows.config};
 });
