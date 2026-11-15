@@ -5,13 +5,13 @@ const $=id=>document.getElementById(id),stage=$('plan-stage');
 function positionLabels(){
  window.CasaRoomPowerView?.position();
  window.CasaLabelLayout.position(stage,$('plan-canvas').querySelector('svg'));
- window.CasaDehumidifier?.position();window.CasaHeater?.position();window.CasaBalconyAppliances?.position();window.CasaDishwasher?.position();window.CasaTV?.position();window.CasaHome?.position();window.CasaEntrance?.position();window.CasaEVRead?.position();window.CasaBalconySensor?.position();window.CasaGate?.position();window.CasaAlarm?.position();window.CasaFan?.position();
+ window.CasaChristmasTree?.position();window.CasaDehumidifier?.position();window.CasaHeater?.position();window.CasaBalconyAppliances?.position();window.CasaDishwasher?.position();window.CasaTV?.position();window.CasaHome?.position();window.CasaEntrance?.position();window.CasaEVRead?.position();window.CasaBalconySensor?.position();window.CasaGate?.position();window.CasaAlarm?.position();window.CasaFan?.position();
 }
 
-function blocked(){return window.CasaDehumidifier?.isDragging()||window.CasaHeater?.isDragging()||window.CasaPlanView.isInteracting()||window.CasaLabelLayout.isDragging()||window.CasaSensorLayout.isDragging()||window.CasaAlarmLayout?.isDragging()||window.CasaFanLayout?.isDragging()||!!document.querySelector('dialog[open]')||!!window.CasaMeteoBridge?.visible()}
+function blocked(){return window.CasaChristmasTree?.isDragging()||window.CasaDehumidifier?.isDragging()||window.CasaHeater?.isDragging()||window.CasaPlanView.isInteracting()||window.CasaLabelLayout.isDragging()||window.CasaSensorLayout.isDragging()||window.CasaAlarmLayout?.isDragging()||window.CasaFanLayout?.isDragging()||!!document.querySelector('dialog[open]')||!!window.CasaMeteoBridge?.visible()}
 function showFloor(id,animate=true){
  if(!plans[id]||blocked())return;
- const p=plans[id],previous=current;window.CasaPlanMove.lock();current=id;$('plan-canvas').innerHTML=p.svg;window.CasaAddons?.mount($('plan-canvas').querySelector('svg'),id);window.CasaHome?.mount($('plan-canvas').querySelector('svg'),id);window.CasaWindows?.mount($('plan-canvas').querySelector('svg'),id);window.CasaEVRead?.mount($('plan-canvas').querySelector('svg'),id);window.CasaEntrance?.mount($('plan-canvas').querySelector('svg'),id);window.CasaGate?.mount($('plan-canvas').querySelector('svg'),id);window.CasaAlarm?.mount($('plan-canvas').querySelector('svg'),id);window.CasaFan?.mount($('plan-canvas').querySelector('svg'),id);window.CasaBalconySensor?.mount($('plan-canvas').querySelector('svg'),id);window.CasaBalconyAppliances?.mount($('plan-canvas').querySelector('svg'),id);window.CasaDishwasher?.mount($('plan-canvas').querySelector('svg'),id);window.CasaTV?.mount($('plan-canvas').querySelector('svg'),id);window.CasaStudioMonitor?.mount($('plan-canvas').querySelector('svg'),id);window.CasaHeater?.mount($('plan-canvas').querySelector('svg'),id);window.CasaDehumidifier?.mount($('plan-canvas').querySelector('svg'),id);$('room-labels').replaceChildren();
+ const p=plans[id],previous=current;window.CasaPlanMove.lock();current=id;$('plan-canvas').innerHTML=p.svg;window.CasaAddons?.mount($('plan-canvas').querySelector('svg'),id);window.CasaHome?.mount($('plan-canvas').querySelector('svg'),id);window.CasaWindows?.mount($('plan-canvas').querySelector('svg'),id);window.CasaEVRead?.mount($('plan-canvas').querySelector('svg'),id);window.CasaEntrance?.mount($('plan-canvas').querySelector('svg'),id);window.CasaGate?.mount($('plan-canvas').querySelector('svg'),id);window.CasaAlarm?.mount($('plan-canvas').querySelector('svg'),id);window.CasaFan?.mount($('plan-canvas').querySelector('svg'),id);window.CasaBalconySensor?.mount($('plan-canvas').querySelector('svg'),id);window.CasaBalconyAppliances?.mount($('plan-canvas').querySelector('svg'),id);window.CasaDishwasher?.mount($('plan-canvas').querySelector('svg'),id);window.CasaTV?.mount($('plan-canvas').querySelector('svg'),id);window.CasaStudioMonitor?.mount($('plan-canvas').querySelector('svg'),id);window.CasaHeater?.mount($('plan-canvas').querySelector('svg'),id);window.CasaDehumidifier?.mount($('plan-canvas').querySelector('svg'),id);window.CasaChristmasTree?.mount($('plan-canvas').querySelector('svg'),id);$('room-labels').replaceChildren();
  $('floor-title').textContent=p.name;stage.setAttribute('aria-label','Planta · '+p.name+' · '+p.subtitle);
  document.querySelectorAll('[data-floor]').forEach(b=>{if(b.dataset.floor===id)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current')});
  for(const room of p.rooms){const b=document.createElement('button');b.className='room-label'+(room.id.startsWith('stairs')?' stairs':'');b.dataset.room=room.id;b.dataset.roomFloor=id;b.dataset.x=room.x;b.dataset.y=room.y;b.textContent=window.CasaRoomNames.get(id,room.id);$('room-labels').append(b);window.CasaLabelLayout.mount(b,id,room);window.CasaRoomNames.bind(b,id,room.id,()=>openRoom(id,room))}
@@ -66,8 +66,20 @@ let labelsVisible=true;
 try{const saved=JSON.parse(localStorage.getItem('casa-nova-labels-v1'));if(typeof saved==='boolean')labelsVisible=saved}catch{}
 setLabelsVisible(labelsVisible);
 
-function step(direction){if(blocked()||Date.now()-lastChange<700)return;const index=order.indexOf(current)+direction;if(index<0||index>=order.length)return;lastChange=Date.now();showFloor(order[index])}
-stage.addEventListener('wheel',e=>{if(blocked()||Math.abs(e.deltaY)<18)return;e.preventDefault();step(e.deltaY>0?1:-1)},{passive:false});
+function step(direction){
+ if(blocked()||Date.now()-lastChange<700)return;
+ const index=order.indexOf(current)+direction;
+ if(index<0){
+  if(!window.CasaMeteoBridge?.openFloor)return;
+  lastChange=Date.now();
+  window.CasaMeteoBridge.openFloor();
+ }else if(index<order.length){
+  lastChange=Date.now();
+  showFloor(order[index]);
+ }
+}
+window.addEventListener('meteofloorreturn',()=>{lastChange=Date.now()});
+stage.addEventListener('wheel',e=>{if(blocked()||e.ctrlKey||e.metaKey||Math.abs(e.deltaY)<18||Math.abs(e.deltaX)>Math.abs(e.deltaY))return;e.preventDefault();step(e.deltaY>0?1:-1)},{passive:false});
 window.addEventListener('keydown',e=>{if(blocked()||/INPUT|SELECT|TEXTAREA/.test(e.target.tagName))return;if(e.key==='PageDown'){e.preventDefault();step(1)}if(e.key==='PageUp'){e.preventDefault();step(-1)}});
 window.addEventListener('roomnameschange',()=>{for(const b of $('room-labels').children)b.textContent=window.CasaRoomNames.get(current,b.dataset.room);positionLabels()});
 window.CasaFloors={show:showFloor,current:()=>current};

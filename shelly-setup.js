@@ -86,11 +86,25 @@
   if(Object.keys(additions).length){const next=C.setup({...saved,...additions},plans);localStorage.setItem(KEY,JSON.stringify(next));saved=next;baseline=localStorage.getItem(KEY)}
   localStorage.setItem(roomTemperatureMarker,'true');
  }}catch{}
+ // Seed once; keep an explicit null from the editor.
+ try{
+  if(saved.christmasTree===undefined){
+   const next=C.setup({...saved,christmasTree:window.CasaChristmasTreeCore.DEVICE},plans);
+   localStorage.setItem(KEY,JSON.stringify(next));
+   saved=next;baseline=localStorage.getItem(KEY);
+  }
+ }catch{}
  $('ev-device').value=saved.evMeter?.deviceId||'';$('ev-channel').value=saved.evMeter?.channel??1;
  $('energy-device').value=saved.homeEnergy?.deviceId||'';$('energy-channel').value=saved.homeEnergy?.channel??0;$('energy-contract').value=saved.homeEnergy?.contractKVA??6.9;
  try{const auth=JSON.parse(localStorage.getItem(AUTH));if(auth&&auth.server===saved.server&&typeof auth.authKey==='string'&&auth.authKey.length<=4096){sessionKey=auth.authKey;$('cloud-remember').checked=true}}catch{}
  $('cloud-server').value=saved.server;$('cloud-key').value=sessionKey;
- const host=$('shelly-room-associations'),fields=[];
+ const host=$('shelly-room-associations'),fields=[],disabledOptions=new Map();
+ function addDisabled(input,key,anchor=input){
+  if(!input.id)input.id='shelly-device-'+key;
+  disabledOptions.set(key,window.CasaShellyDisabled.mount(input,!!saved.disabledShellys?.includes(key),anchor));
+ }
+ addDisabled($('energy-device'),'homeEnergy');addDisabled($('ev-device'),'evMeter');
+
  const heaterGroup=document.createElement('details');heaterGroup.id='shelly-heater-group';heaterGroup.innerHTML='<summary>Termoventilador · equipamento móvel</summary><p>Controlo da alimentação e leitura de consumo. A localização na planta não altera esta associação.</p>';host.append(heaterGroup);
  const dehumidifierGroup=document.createElement('details');dehumidifierGroup.id='shelly-dehumidifier-group';dehumidifierGroup.innerHTML='<summary>Desumidificador · equipamento móvel</summary><p>Controlo da alimentação e leitura de consumo. A localização na planta não altera esta associação.</p>';host.append(dehumidifierGroup);
  function fieldset(parent,title,value,kind,key){
@@ -105,7 +119,14 @@
    type.value=kind==='light'?(value?.type||'switch'):(value?.source||'blu');typeLabel.append(type);typeLabel.style.gridColumn='1 / -1';fieldsHost.append(typeLabel);
   }
   box.append(fieldsHost);parent.append(box);fields.push({input,channel,type,kind,key});
+  const group={studio:'studioBindings',media:'mediaBindings','balcony-meter':'balconyMeters','kitchen-meter':'kitchenMeters',window:'windowContacts',blind:'blinds',light:'lights'}[kind];
+  addDisabled(input,group?group+':'+key:key,fieldsHost);
  }
+ const treeGroup=document.createElement('details');
+ treeGroup.id='shelly-christmas-tree-group';
+ treeGroup.innerHTML='<summary>Árvore de Natal · equipamento móvel</summary>';
+ host.append(treeGroup);
+ fieldset(treeGroup,'Shelly das luzes',saved.christmasTree,'tree','christmasTree');
  const fanGroup=document.createElement('details');fanGroup.id='shelly-fan-group';fanGroup.innerHTML='<summary>Ventoinha · garagem</summary>';host.append(fanGroup);fieldset(fanGroup,'Shelly da ventoinha',saved.fan,'meter','fan');
  fieldset(heaterGroup,'Shelly do termoventilador',saved.heater,'meter','heater');
  fieldset(dehumidifierGroup,'Shelly do desumidificador',saved.dehumidifier,'meter','dehumidifier');
@@ -133,9 +154,13 @@
   const box=document.createElement('fieldset'),title=document.createElement('legend');title.textContent=role==='arm'?'Shelly que arma/desarma':'Shelly que indica disparo · só leitura';box.append(title);
   const idLabel=document.createElement('label');idLabel.textContent='ID do Shelly';const input=document.createElement('input');input.type='text';input.autocomplete='off';input.spellcheck=false;input.pattern='[a-fA-F0-9]{6,32}';input.maxLength=32;input.placeholder='Por associar';input.value=saved.alarm?.[role]?.deviceId||'';idLabel.append(input);
   const channelLabel=document.createElement('label');channelLabel.textContent='Canal';const channel=document.createElement('input');channel.type='number';channel.min=0;channel.max=15;channel.step=1;channel.value=saved.alarm?.[role]?.channel??0;channelLabel.append(channel);
-  const polarityLabel=document.createElement('label');polarityLabel.textContent='Correspondência do estado';const polarity=document.createElement('select');for(const [v,t]of [['on','ON'],['off','OFF']]){const o=document.createElement('option');o.value=v;o.textContent=t+' = '+(role==='arm'?'armado':'a tocar');polarity.append(o)}polarity.value=saved.alarm?.[role]?.activeWhenOn===false?'off':'on';polarityLabel.append(polarity);box.append(idLabel,channelLabel,polarityLabel);alarmGroup.append(box);alarmFields.push({role,input,channel,polarity});
+  const polarityLabel=document.createElement('label');polarityLabel.textContent='Correspondência do estado';const polarity=document.createElement('select');for(const [v,t]of [['on','ON'],['off','OFF']]){const o=document.createElement('option');o.value=v;o.textContent=t+' = '+(role==='arm'?'armado':'a tocar');polarity.append(o)}polarity.value=saved.alarm?.[role]?.activeWhenOn===false?'off':'on';polarityLabel.append(polarity);box.append(idLabel,channelLabel,polarityLabel);alarmGroup.append(box);alarmFields.push({role,input,channel,polarity});addDisabled(input,'alarm:'+role,polarityLabel);
  }
  const sensorGroup=document.createElement('details'),sensorTitle=document.createElement('summary');sensorTitle.textContent='MeteoNL · Temperatura real';sensorGroup.append(sensorTitle);host.append(sensorGroup);fieldset(sensorGroup,'Sensor ambiente',saved.meteoSensor,'sensor','meteoSensor');
+ function configureCloud(){
+  const active=C.activeSetup(saved,plans);
+  window.CasaCloudRead?.configure({server:active.server,authKey:sessionKey},active.homeEnergy,blocked,active.evMeter,active.entranceContact,active.meteoSensor,active.garageSensor,active.livingSensor,active.masterSensor,active.gateContact,active.blinds,active.alarm||{},active.windowContacts||{},active.lights||{},active.tvMeter||null,active.heater||null,active.dehumidifier||null,active.dishwasherMeter||null,active.balconyMeters||{},active.mediaBindings||{},active.studioBindings||{},active.fan||null,active.kitchenMeters||{},active.christmasTree||null);
+ }
  function blocked(){try{return dirty||localStorage.getItem(KEY)!==baseline}catch{return true}}
  function status(message,error=false){$('shelly-setup-status').textContent=message;$('shelly-setup-status').classList.toggle('error',error)}
  function mark(){dirty=true;status('Alterações por guardar. Os estores reais ficam bloqueados até guardar.')}
@@ -143,12 +168,12 @@
  function reveal(input){for(let p=input.parentElement;p;p=p.parentElement)if(p.tagName==='DETAILS')p.open=true;input.focus()}
  $('shelly-setup-form').addEventListener('invalid',e=>reveal(e.target),true);
  $('shelly-setup-form').addEventListener('submit',e=>{
-  e.preventDefault();const out={fan:null,studioBindings:{},mediaBindings:{},balconyMeters:{},kitchenMeters:{},server:$('cloud-server').value.trim(),lights:{},blinds:{},windowContacts:{},entranceContact:null,gateContact:null,meteoSensor:null,garageSensor:null,livingSensor:null,masterSensor:null,dehumidifier:null,heater:null,tvMeter:null,dishwasherMeter:null};
+  e.preventDefault();const out={disabledShellys:[...disabledOptions].filter(([,box])=>box.checked).map(([key])=>key),fan:null,christmasTree:null,studioBindings:{},mediaBindings:{},balconyMeters:{},kitchenMeters:{},server:$('cloud-server').value.trim(),lights:{},blinds:{},windowContacts:{},entranceContact:null,gateContact:null,meteoSensor:null,garageSensor:null,livingSensor:null,masterSensor:null,dehumidifier:null,heater:null,tvMeter:null,dishwasherMeter:null};
   try{
    for(const f of fields){f.input.setCustomValidity('');if(!f.input.value.trim())continue;
     const channel=Number(f.channel.value),b={deviceId:f.input.value.trim(),channel};
     if(!f.channel.value.trim()||!Number.isInteger(channel)){reveal(f.channel);throw Error('Indique um canal inteiro.')}
-    if(f.kind==='studio'){out.studioBindings[f.key]=b}else if(f.kind==='media'){out.mediaBindings[f.key]=b}else if(f.kind==='balcony-meter'){out.balconyMeters[f.key]=b}else if(f.kind==='kitchen-meter'){out.kitchenMeters[f.key]=b}else if(f.kind==='meter'){out[f.key]=b}else if(f.kind==='window'){b.source=f.type.value;out.windowContacts[f.key]=b}else if(f.kind==='sensor'){out[f.key]=b}else if(f.kind==='contact'){b.source=f.type.value;out[f.key]=b}else{b.type=f.kind==='blind'?'cover':f.type.value;out[f.kind==='blind'?'blinds':'lights'][f.key]=b}
+    if(f.kind==='studio'){out.studioBindings[f.key]=b}else if(f.kind==='media'){out.mediaBindings[f.key]=b}else if(f.kind==='balcony-meter'){out.balconyMeters[f.key]=b}else if(f.kind==='kitchen-meter'){out.kitchenMeters[f.key]=b}else if(f.kind==='meter'||f.kind==='tree'){out[f.key]=b}else if(f.kind==='window'){b.source=f.type.value;out.windowContacts[f.key]=b}else if(f.kind==='sensor'){out[f.key]=b}else if(f.kind==='contact'){b.source=f.type.value;out[f.key]=b}else{b.type=f.kind==='blind'?'cover':f.type.value;out[f.kind==='blind'?'blinds':'lights'][f.key]=b}
    }
    const alarm={};for(const f of alarmFields){const id=f.input.value.trim();if(id){if(!f.channel.value.trim()||!Number.isInteger(Number(f.channel.value)))throw Error('Indique um canal inteiro para o alarme.');alarm[f.role]={deviceId:id,channel:Number(f.channel.value),activeWhenOn:f.polarity.value==='on'}}}if(saved.alarm!==undefined||Object.keys(alarm).length)out.alarm=alarm;
    const meterId=$('energy-device').value.trim();out.homeEnergy=meterId?{source:'custom',deviceId:meterId,channel:Number($('energy-channel').value),contractKVA:Number($('energy-contract').value)}:null;
@@ -159,7 +184,7 @@
    const oldConfig=localStorage.getItem(KEY),oldAuth=localStorage.getItem(AUTH);
    try{if(remember&&auth)localStorage.setItem(AUTH,JSON.stringify({server:clean.server,authKey:auth}));else localStorage.removeItem(AUTH);localStorage.setItem(KEY,JSON.stringify(clean))}
    catch(error){if(oldAuth===null)localStorage.removeItem(AUTH);else localStorage.setItem(AUTH,oldAuth);if(oldConfig===null)localStorage.removeItem(KEY);else localStorage.setItem(KEY,oldConfig);throw error}
-   baseline=localStorage.getItem(KEY);saved=clean;sessionKey=auth;dirty=false;status('Configuração guardada. Leituras Cloud atualizadas automaticamente; estores e luzes associados têm controlo real; restantes equipamentos em demonstração.');window.CasaCloudRead?.configure({server:saved.server,authKey:sessionKey},saved.homeEnergy,blocked,saved.evMeter,saved.entranceContact,saved.meteoSensor,saved.garageSensor,saved.livingSensor,saved.masterSensor,saved.gateContact,saved.blinds,saved.alarm||{},saved.windowContacts||{},saved.lights||{},saved.tvMeter||null,saved.heater||null,saved.dehumidifier||null,saved.dishwasherMeter||null,saved.balconyMeters||{},saved.mediaBindings||{},saved.studioBindings||{},saved.fan||null,saved.kitchenMeters||{});
+   baseline=localStorage.getItem(KEY);saved=clean;sessionKey=auth;dirty=false;status('Configuração guardada. Os equipamentos desativados não são consultados.');configureCloud();
   }catch(error){status(error.message,true)}
  });
  function open(floor,room){
@@ -172,6 +197,6 @@
  function openEquipment(id){open();const target=$(id);if(!target)return false;return revealId(target.matches('input')?target:target.querySelector('input'))}
  window.addEventListener('storage',e=>{if(e.key===KEY&&e.newValue!==baseline)status('A configuração mudou noutra janela. Recarregue antes de guardar.',true)});
  window.addEventListener('roomnameschange',()=>{for(const d of host.querySelectorAll('[data-setup-room]')){const [floor,room]=d.dataset.setupRoom.split(':');d.querySelector('summary').textContent=window.CasaRoomNames.get(floor,room)}});
- window.CasaShellySetup={open,openEquipment,openDevice,isDirty:blocked,snapshot:()=>C.setup(saved,plans)};
- window.CasaCloudRead?.configure({server:saved.server,authKey:sessionKey},saved.homeEnergy,blocked,saved.evMeter,saved.entranceContact,saved.meteoSensor,saved.garageSensor,saved.livingSensor,saved.masterSensor,saved.gateContact,saved.blinds,saved.alarm||{},saved.windowContacts||{},saved.lights||{},saved.tvMeter||null,saved.heater||null,saved.dehumidifier||null,saved.dishwasherMeter||null,saved.balconyMeters||{},saved.mediaBindings||{},saved.studioBindings||{},saved.fan||null,saved.kitchenMeters||{});
+ window.CasaShellySetup={open,openEquipment,openDevice,isDirty:blocked,activeSnapshot:()=>C.activeSetup(saved,plans),snapshot:()=>C.setup(saved,plans)};
+ configureCloud();
 })();

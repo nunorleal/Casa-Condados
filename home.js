@@ -99,8 +99,12 @@
   base.append(hits);update();
  }
  let pendingPortableUpdate=false;
+ function lightingAt(floor,room,state=visualState(),night=window.CasaEnvironment?.isDay()===false,balconyDay=window.CasaEnvironment?.isSolarDay?.()){
+  const roomNight=room.startsWith('balcony')&&typeof balconyDay==='boolean'?!balconyDay:night;
+  return C.lighting(state,floor,room,roomNight);
+ }
  function update(){
-  if(window.CasaHeater?.isDragging()||window.CasaDehumidifier?.isDragging()){pendingPortableUpdate=true;return}pendingPortableUpdate=false;
+  if(window.CasaChristmasTree?.isDragging()||window.CasaHeater?.isDragging()||window.CasaDehumidifier?.isDragging()){pendingPortableUpdate=true;return}pendingPortableUpdate=false;
   if(!current)return;const displayState=visualState(),{floor}=current,night=window.CasaEnvironment?.isDay()===false,solarDay=window.CasaEnvironment?.isSolarDay?.(),balconyDay=typeof solarDay==='boolean'?solarDay:!night,p=window.CasaPlans[floor];
   for(const room of p.rooms){
    const lighting=C.lighting(displayState,floor,room,room.id.startsWith('balcony')?!balconyDay:night),on=lighting.on;
@@ -112,7 +116,7 @@
   }
   if(floor==='3')window.CasaFloor3Render?.sync(current.svg,displayState,night,p.rooms,balconyDay);
   if(floor==='4')window.CasaFloor4Render?.sync(current.svg,displayState,night,p.rooms);
-  window.CasaCats?.lighting(displayState,night);window.CasaHeater?.lighting(displayState,night);window.CasaDehumidifier?.lighting(displayState,night);
+  window.CasaCats?.lighting(displayState,night);window.CasaHeater?.lighting(displayState,night);window.CasaChristmasTree?.drawLighting(displayState,night,balconyDay);window.CasaDehumidifier?.lighting(displayState,night);
   current.svg.querySelector('[data-mask-base]').setAttribute('fill',night?'white':'black');
   for(const w of C.WINDOWS.filter(w=>w.floor===floor)){
    const info=blindInfo(w.id),p=C.position(displayState,w.id);current.beams.get(w.id).setAttribute('opacity',C.beamOpacity(displayState,w.id,night));
@@ -189,7 +193,7 @@
  async function setAllLights(on){if(typeof on!=='boolean')throw new TypeError('Estado de luz inválido');const result={sent:0,simulated:0,skipped:0};for(const key of C.roomKeys(window.CasaPlans)){const [floor,room]=key.split(':'),s=lightInfo(floor,room);if(!s.configured){state.lights[key]=on;result.simulated++;continue}if(!s.canControl){result.skipped++;continue}try{await window.CasaCloudRead.commandLight(key,on);result.sent++}catch{result.skipped++}}remember();syncRoom();return result}
 
  async function setAllBlinds(value){if(value!==0&&value!==100)throw new TypeError('Posição de estores inválida');const result={sent:0,simulated:0,skipped:0};for(const w of C.WINDOWS){const s=blindInfo(w.id);if(!s.configured){followers.manual(w.id,visualState(),blindInfo);state.blinds[w.id]=value;result.simulated++;continue}if(!s.canControl){result.skipped++;continue}try{await window.CasaCloudRead.commandBlind(w.id,value===100?'open':'close');result.sent++}catch{result.skipped++}}remember();syncRoom();return result}
- window.addEventListener('portabledragchange',()=>{if(pendingPortableUpdate&&!window.CasaHeater?.isDragging()&&!window.CasaDehumidifier?.isDragging())update()});
+ window.addEventListener('portabledragchange',()=>{if(pendingPortableUpdate&&!window.CasaHeater?.isDragging()&&!window.CasaDehumidifier?.isDragging()&&!window.CasaChristmasTree?.isDragging())update()});
  window.addEventListener('roomnameschange',position);window.addEventListener('energychange',()=>{update();syncBlind();syncRoom()});window.addEventListener('environmentchange',update);
  // Resolve the visible bar in SVG coordinates as well as its HTML accessibility control.
  // Safari can target the plan underneath a transparent overlay; the same bar must still work.
@@ -206,5 +210,5 @@
   const control=blindTarget(event);if(!control)return;event.preventDefault();event.stopImmediatePropagation();openBlind(control.dataset.blindWindow);
  },true);
  window.CasaBlindDragAdapter={selector:'.blind-window-trigger,.blind-banner',target:blindTarget,context:()=>document.getElementById('plan-stage').getAttribute('aria-label'),id:node=>node.dataset.blindWindow||node.dataset.blind,snapshot(id){const s=blindInfo(id);return {configured:s.configured,position:s.configured?s.position:demoPosition(id),previewAllowed:!s.configured||s.canSelectPosition,allowed:!s.configured||s.canPosition,token:s.configured?'real:'+s.revision:'demo'}},commit:changeBlind};
- window.CasaHome={mount,position,decorateRoom,setAllLights,setAllBlinds,snapshot:()=>C.demo(state,window.CasaPlans)};
+ window.CasaHome={mount,position,lightingAt,decorateRoom,setAllLights,setAllBlinds,snapshot:()=>C.demo(state,window.CasaPlans)};
 })();
