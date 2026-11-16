@@ -3,6 +3,13 @@
  'use strict';
  const G=window.BannerGeometry,C=window.CasaLabelLayoutCore;
  function create(KEY,selector,sensors=false,customValidate=null){
+ const sharedName={
+  'casa-nova-room-label-layout-v1':'room',
+  'casa-leal-sensor-layout-v1':'sensor',
+  'casa-leal-alarm-layout-v1':'alarm',
+  'casa-leal-fan-layout-v1':'fan',
+  'casa-leal-ev-layout-v1':'ev'
+ }[KEY];
  const validate=customValidate||(sensors?C.sensorPositions:C.positions);
  let saved=Object.create(null),active=null;
  const entries=new WeakMap();
@@ -12,6 +19,7 @@
  function store(entry,b){
   saved[entry.floor]??=Object.create(null);saved[entry.floor][entry.room.id]={x:Number(b.dataset.x),y:Number(b.dataset.y)};
   try{localStorage.setItem(KEY,JSON.stringify(validate(saved,window.CasaPlans)))}catch{}
+  if(sharedName)window.dispatchEvent(new CustomEvent('housepreferencechange',{detail:{setting:'banner-position:'+sharedName+':'+entry.floor+':'+entry.room.id,value:saved[entry.floor][entry.room.id]}}));
  }
  function position(stage,svg){
   if(!svg)return;const v=viewport(stage,svg);if(v.scale<=0)return;
@@ -75,7 +83,26 @@
  window.addEventListener('blur',()=>active?.cancel());
  document.addEventListener('visibilitychange',()=>{if(document.hidden)active?.cancel()});
  window.addEventListener('keydown',e=>{if(e.key==='Escape'&&active){active.cancel();e.preventDefault()}});
- return {mount,position,snapshot:()=>validate(saved,window.CasaPlans),cancel:()=>active?.cancel(),isDragging:()=>!!active};
+ function applySharedPosition(address,p){
+  const [floor,room]=address.split(':');
+  const previous=saved[floor]?.[room];
+  if((active?.entry.floor===floor&&active.entry.room.id===room)||(previous?.x===p.x&&previous.y===p.y))return;
+  try{
+   const candidate=validate({[floor]:{[room]:p}},window.CasaPlans);
+   const next=candidate[floor]?.[room];
+   if(!next||next.x!==p.x||next.y!==p.y)return;
+   const merged={...saved,[floor]:{...saved[floor],[room]:next}};
+   localStorage.setItem(KEY,JSON.stringify(merged));
+   saved=merged;
+   for(const b of document.querySelectorAll(selector)){
+    const entry=entries.get(b);
+    if(entry?.floor===floor&&entry.room.id===room){b.dataset.x=p.x;b.dataset.y=p.y}
+   }
+   const stage=document.getElementById('plan-stage');
+   position(stage,stage.querySelector('#plan-canvas svg'));
+  }catch{}
+ }
+ return {mount,position,applySharedPosition,snapshot:()=>validate(saved,window.CasaPlans),cancel:()=>active?.cancel(),isDragging:()=>!!active};
  }
  window.CasaCreateLayout=create;
  window.CasaLabelLayout=create('casa-nova-room-label-layout-v1','#room-labels > *');
