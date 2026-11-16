@@ -34,7 +34,9 @@ stage.addEventListener('click',e=>{
 });
 document.querySelectorAll('[data-floor]').forEach(b=>b.addEventListener('click',()=>showFloor(b.dataset.floor)));
 $('home-button').addEventListener('click',()=>showFloor('3'));
-$('open-settings').addEventListener('click',()=>$('settings-dialog').showModal());
+const settingsDialog=$('settings-dialog'), plantDisplay=$('plant-display-settings');
+settingsDialog.addEventListener('close',()=>{plantDisplay.open=false});
+$('open-settings').addEventListener('click',()=>settingsDialog.showModal());
 $('open-scenarios').addEventListener('click',()=>$('scenarios-dialog').showModal());
 document.querySelectorAll('[data-scene]').forEach(button=>button.addEventListener('click',async()=>{
  const action=button.dataset.scene,blinds=action.startsWith('blinds-'),on=action==='lights-on',open=action==='blinds-open';
