@@ -1,8 +1,12 @@
-/* node build.cjs /path/to/node_modules. All generated files stay in dist/meteo. */
-const path=require('node:path'),fs=require('node:fs');
-// MeteoNL has its own shared version, independent of each house application.
-const version=fs.readFileSync(path.join(__dirname,'app-info.ts'),'utf8').match(/APP_VERSION\s*=\s*["'](\d+\.\d+)["']/)?.[1];
-if(!version)throw new Error('Missing MeteoNL APP_VERSION');
-const dependencies=path.resolve(process.argv[2]||path.join(__dirname,'node_modules'));
-const esbuild=require(process.argv[3] || require.resolve('esbuild',{paths:[dependencies]}));
-esbuild.buildSync({entryPoints:[path.join(__dirname,'main.tsx')],bundle:true,minify:true,format:'iife',target:['safari15'],jsx:'automatic',nodePaths:[dependencies],outdir:path.join(__dirname,'../meteo/assets'),entryNames:'app-'+version,define:{'process.env.NODE_ENV':'"production"'}});
+// Casa Condados receives the integrated release built from the T2 sources.
+const fs = require('node:fs');
+const path = require('node:path');
+const {execFileSync} = require('node:child_process');
+
+const condados = path.resolve(__dirname, '..');
+const t2 = path.resolve(process.env.METEONL_T2 || path.join(condados, '..', 'DomoticaNL V2'));
+const build = path.join(t2, 'meteo-src', 'build.cjs');
+if (!fs.existsSync(build)) {
+  throw new Error('Indique a pasta da T2 em METEONL_T2 para gerar a versão partilhada da MeteoNL.');
+}
+execFileSync(process.execPath, [build, ...process.argv.slice(2), '--condados', condados], {stdio: 'inherit'});
