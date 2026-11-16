@@ -6,4 +6,6 @@
  function draw(){slider.value=value;output.textContent=value+'%';document.documentElement.style.setProperty('--banner-scale',String(value/100))}
  window.CasaBannerSize={value:()=>value};draw();
  slider.addEventListener('input',()=>{value=C.sensorScale(Number(slider.value));try{localStorage.setItem(KEY,JSON.stringify(value))}catch{}draw();window.dispatchEvent(new Event('bannersizechange'))});
+
+ slider.addEventListener('change',()=>window.dispatchEvent(new CustomEvent('housepreferencechange',{detail:{setting:'banner-scale',value:value}})));
 })();

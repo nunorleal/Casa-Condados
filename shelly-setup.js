@@ -162,6 +162,58 @@
   window.CasaCloudRead?.configure({server:active.server,authKey:sessionKey},active.homeEnergy,blocked,active.evMeter,active.entranceContact,active.meteoSensor,active.garageSensor,active.livingSensor,active.masterSensor,active.gateContact,active.blinds,active.alarm||{},active.windowContacts||{},active.lights||{},active.tvMeter||null,active.heater||null,active.dehumidifier||null,active.dishwasherMeter||null,active.balconyMeters||{},active.mediaBindings||{},active.studioBindings||{},active.fan||null,active.kitchenMeters||{},active.christmasTree||null);
  }
  function blocked(){try{return dirty||localStorage.getItem(KEY)!==baseline}catch{return true}}
+ function sharedConfiguration(value){
+  const {disabledShellys,...shared}=C.setup(value,plans);
+  return shared;
+ }
+ function fillSharedConfiguration(){
+  $('cloud-server').value=saved.server;
+  $('cloud-key').value=sessionKey;
+  for(const {input,channel,type,kind,key} of fields){
+   const group={studio:'studioBindings',media:'mediaBindings','balcony-meter':'balconyMeters','kitchen-meter':'kitchenMeters',
+    window:'windowContacts',blind:'blinds',light:'lights'}[kind];
+   const value=group?saved[group]?.[key]:saved[key];
+   input.value=value?.deviceId||'';
+   input.setCustomValidity('');
+   channel.value=value?.channel??0;
+   if(type)type.value=kind==='light'?(value?.type||'switch'):(value?.source||'blu');
+  }
+  for(const {role,input,channel,polarity} of alarmFields){
+   const value=saved.alarm?.[role];
+   input.value=value?.deviceId||'';
+   channel.value=value?.channel??0;
+   polarity.value=value?.activeWhenOn===false?'off':'on';
+  }
+  for(const [prefix,binding] of [['energy',saved.homeEnergy],['ev',saved.evMeter]]){
+   $(prefix+'-device').value=binding?.deviceId||'';
+   $(prefix+'-channel').value=binding?.channel??0;
+  }
+  $('energy-contract').value=saved.homeEnergy?.contractKVA??6.9;
+ }
+ function applySharedConfiguration(shared){
+  if(window.CasaSharedConfig.equal(sharedConfiguration(saved),shared)||blocked()||window.CasaCloudRead?.isBusy())return;
+  try{
+   const sameServer=saved.server===shared.server;
+   const next=C.setup({...shared,disabledShellys:saved.disabledShellys},plans);
+   const stored=JSON.stringify(next);
+   localStorage.setItem(KEY,stored);
+   saved=next;baseline=stored;
+   if(!sameServer){sessionKey='';$('cloud-remember').checked=false}
+   fillSharedConfiguration();
+   configureCloud();
+  }catch{}
+ }
+ function applySharedDisabled(values){
+  if((saved.disabledShellys||[]).join()===values.join()||blocked()||window.CasaCloudRead?.isBusy())return;
+  try{
+   const next=C.setup({...saved,disabledShellys:values},plans);
+   const stored=JSON.stringify(next);
+   localStorage.setItem(KEY,stored);
+   saved=next;baseline=stored;
+   for(const [id,box] of disabledOptions)box.checked=values.includes(id);
+   configureCloud();
+  }catch{}
+ }
  function status(message,error=false){$('shelly-setup-status').textContent=message;$('shelly-setup-status').classList.toggle('error',error)}
  function mark(){dirty=true;status('Alterações por guardar. Os estores reais ficam bloqueados até guardar.')}
  $('shelly-setup-form').addEventListener('input',mark);$('shelly-setup-form').addEventListener('change',mark);
@@ -184,7 +236,10 @@
    const oldConfig=localStorage.getItem(KEY),oldAuth=localStorage.getItem(AUTH);
    try{if(remember&&auth)localStorage.setItem(AUTH,JSON.stringify({server:clean.server,authKey:auth}));else localStorage.removeItem(AUTH);localStorage.setItem(KEY,JSON.stringify(clean))}
    catch(error){if(oldAuth===null)localStorage.removeItem(AUTH);else localStorage.setItem(AUTH,oldAuth);if(oldConfig===null)localStorage.removeItem(KEY);else localStorage.setItem(KEY,oldConfig);throw error}
+   const before=saved.disabledShellys||[],after=clean.disabledShellys||[];
    baseline=localStorage.getItem(KEY);saved=clean;sessionKey=auth;dirty=false;status('Configuração guardada. Os equipamentos desativados não são consultados.');configureCloud();
+   window.dispatchEvent(new CustomEvent('housepreferencechange',{detail:{setting:'shelly-config',value:sharedConfiguration(clean)}}));
+   if(before.join()!==after.join())window.dispatchEvent(new CustomEvent('housepreferencechange',{detail:{setting:'shelly-disabled',value:after}}));
   }catch(error){status(error.message,true)}
  });
  function open(floor,room){
@@ -197,6 +252,6 @@
  function openEquipment(id){open();const target=$(id);if(!target)return false;return revealId(target.matches('input')?target:target.querySelector('input'))}
  window.addEventListener('storage',e=>{if(e.key===KEY&&e.newValue!==baseline)status('A configuração mudou noutra janela. Recarregue antes de guardar.',true)});
  window.addEventListener('roomnameschange',()=>{for(const d of host.querySelectorAll('[data-setup-room]')){const [floor,room]=d.dataset.setupRoom.split(':');d.querySelector('summary').textContent=window.CasaRoomNames.get(floor,room)}});
- window.CasaShellySetup={open,openEquipment,openDevice,isDirty:blocked,activeSnapshot:()=>C.activeSetup(saved,plans),snapshot:()=>C.setup(saved,plans)};
+ window.CasaShellySetup={sharedConfiguration,applySharedConfiguration,applySharedDisabled,open,openEquipment,openDevice,isDirty:blocked,activeSnapshot:()=>C.activeSetup(saved,plans),snapshot:()=>C.setup(saved,plans)};
  configureCloud();
 })();

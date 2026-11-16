@@ -1,6 +1,6 @@
 # MeteoNL integrada na Casa Condados
 
-Usa a mesma distribuição da MeteoNL da T2. A fonte canónica está em `DomoticaNL V2/meteo-src/`. A pasta `meteo-src/` aqui acompanha essa fonte para inspeção e testes. A versão autónoma anterior é histórica.
+A MeteoNL mostra o número de versão da planta dos Condados. O pacote é o mesmo que a T2 usa. A fonte canónica está em `DomoticaNL V2/meteo-src/`. A pasta `meteo-src/` aqui acompanha essa fonte para inspeção e testes. A versão autónoma anterior é histórica.
 
 Com os projetos lado a lado, executar `node meteo-src/build.cjs` nos Condados para gerar o pacote uma vez na T2 e copiá-lo para os dois projetos. Se os projetos estiverem noutro local, `METEONL_T2` pode indicar a pasta da T2. Pode ainda passar o caminho de `node_modules` como primeiro argumento.
 

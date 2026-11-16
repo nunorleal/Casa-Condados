@@ -139,5 +139,5 @@
  function moveGuiBulbToStudio(previous={},fallbackId='98cdac1f18fa'){const next={...previous};if(previous['3:bedroom2'])next['4:studio']={...previous['3:bedroom2']};else if(!next['4:studio'])next['4:studio']={deviceId:fallbackId,channel:0,type:'light'};delete next['3:bedroom2'];return next}
  function associateBulbs(previous={}){const next=moveGuiBulbToStudio(previous);for(const [room,deviceId]of Object.entries(SUPPLIED_BULBS)){const old=next[room];next[room]={deviceId,channel:old?.deviceId?.toLowerCase()===deviceId?old.channel:0,type:'light'}}return next}
  function emptySetup(){return {server:'',lights:{},blinds:{},entranceContact:null}}
- return {activeSetup,KITCHEN_METERS,kitchenMeterConfig,DEMO_BLIND_LINKS,WINDOWS,key,roomKeys,demo,defaults,position,light,opacity,lighting,beam,beamOpacity,setup,emptySetup,SUPPLIED_BULBS,moveGuiBulbToStudio,associateBulbs,server,windowContactsConfig:Windows.config};
+ return {activeSetup,disabledFields,KITCHEN_METERS,kitchenMeterConfig,DEMO_BLIND_LINKS,WINDOWS,key,roomKeys,demo,defaults,position,light,opacity,lighting,beam,beamOpacity,setup,emptySetup,SUPPLIED_BULBS,moveGuiBulbToStudio,associateBulbs,server,windowContactsConfig:Windows.config};
 });
