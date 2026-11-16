@@ -7,3 +7,10 @@ dialog .settings-shelly-content{padding:0 0 12px}dialog #shelly-setup.settings-d
 #settings-dialog .weather-settings[hidden]{display:none!important}
 
 #settings-dialog #environment-status[hidden],#settings-dialog #screensaver-status[hidden]{display:none!important}
+
+#plant-display-settings .plant-settings-sync-status {
+  margin: 4px 0 14px;
+  color: #4f6d85;
+  font-size: 12px;
+  line-height: 1.5;
+}

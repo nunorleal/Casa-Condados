@@ -16,7 +16,20 @@
  function place(p){if(!svg||p.floor!==floor)return;const m=svg.getScreenCTM();if(!m)return;screenInverse=m.inverse();const q=new DOMPoint(p.x,p.y).matrixTransform(m),r=stage.getBoundingClientRect(),scale=Math.hypot(m.a,m.b);object.style.left=(q.x-r.left)+'px';object.style.top=(q.y-r.top)+'px';object.style.width=(84*scale)+'px';object.style.height=(84*scale)+'px'}
  function position(){if(active?.moving)return;object.hidden=!shown||saved.floor!==floor;if(!object.hidden)place(active?.target?{...saved,...active.target}:saved)}
  function notify(message){$('heater-message').textContent=message}
- function commit(next){const clean=C.layout(next,plans);try{localStorage.setItem(KEY,JSON.stringify(clean));saved=clean;window.CasaCloudRead.setHeaterLocation(saved.floor,saved.room);draw();window.dispatchEvent(new Event('heaterlocationchange'));return true}catch(e){notify('Não foi possível guardar a localização. '+e.message);position();return false}}
+ function commit(next,publish=true){
+  const clean=C.layout(next,plans);
+  try{localStorage.setItem(KEY,JSON.stringify(clean))}catch{notify('A posição mudou, mas não foi possível guardá-la neste navegador.')}
+  saved=clean;
+  window.CasaCloudRead.setHeaterLocation(saved.floor,saved.room);
+  draw();
+  window.dispatchEvent(new Event('heaterlocationchange'));
+  if(publish)window.dispatchEvent(new CustomEvent('plantpositionchange',{detail:{setting:'heater',position:clean}}));
+  return true;
+ }
+ function applySharedPosition(next){
+  if(active||['floor','room','x','y'].every(k=>saved[k]===next[k]))return;
+  try{commit(next,false)}catch{}
+ }
  const fmt=(v,n)=>Number.isFinite(v)?v.toLocaleString('pt-PT',{maximumFractionDigits:n}):'—';
  function draw(){const d=window.CasaCloudRead.heaterSnapshot(),dirty=window.CasaShellySetup.isDirty(),on=d.on,label=window.CasaCloudRead.connectionState({kind:'heater'}).offline?'Offline':on===true?'Ligado':on===false?'Desligado':'Por confirmar';object.dataset.power=on===true?'on':on===false?'off':'unknown';object.setAttribute('aria-label','Termoventilador · '+roomName()+' · '+label);$('heater-location').textContent=plans[saved.floor].name+' · '+roomName();$('heater-state').textContent=label;$('heater-state').hidden=typeof on==='boolean';updateTimer();updatePlanTimer(d);const button=$('heater-toggle');button.disabled=!d.canControl||dirty;button.classList.toggle('is-on',on===true);button.setAttribute('aria-pressed',on===null?'mixed':String(on));button.setAttribute('aria-busy',String(d.pending));button.setAttribute('aria-label',on===true?'Desligar termoventilador':'Ligar termoventilador');$('heater-refresh').disabled=!d.configured||!d.accountReady||dirty;
   $('heater-watts').textContent=fmt(d.powerWatts??d.lastPower?.value,1);window.CasaDailyEnergy?.show($('heater-kwh'),'heater','',false);$('heater-watts-quality').textContent=d.powerWatts===null&&d.lastPower?'Última leitura':'';$('heater-kwh-quality').textContent='Registo parcial';$('heater-quality').hidden=typeof on==='boolean';$('heater-quality').textContent=d.quality+(d.lastReading?' · Última alimentação: '+(d.lastReading.on?'ligada':'desligada'):'');const retry=window.CasaCloudRead.connectionSnapshot().retryAt,wait=Math.ceil((retry-Date.now())/1000);notify(dirty?'Guarde as alterações Shelly antes de comandar.':d.pending?(d.timerPending?'A confirmar o temporizador no Shelly…':'A confirmar a alimentação pela leitura Cloud.'):wait>0?'Limite Cloud · nova consulta automática dentro de '+wait+' s.':d.message&&!/confirmad[oa]/i.test(d.message)?d.message:'');lighting();position();
@@ -35,5 +48,5 @@
  function mount(next,id){cancel();svg=next;floor=id;screenInverse=null;draw()}
  function decorateRoom(host,f,r){if(f!==saved.floor||r!==saved.room)return;const row=document.createElement('div');row.className='room-device-row';row.innerHTML='<div><h3>Termoventilador</h3><p data-room-heater-state></p></div>';const button=document.createElement('button');button.type='button';button.className='room-round';button.append(document.getElementById('open-settings').querySelector('svg').cloneNode(true));button.setAttribute('aria-label','Detalhes e controlo do termoventilador');button.addEventListener('click',()=>{$('room-dialog').close();open()});row.append(button);host.append(row);draw()}
  const general=document.createElement('button');general.type='button';general.className='settings-row';general.textContent='Termoventilador · mover e controlar';general.addEventListener('click',()=>{$('scenarios-dialog').close();open()});$('scenarios-dialog').append(general);
- window.CasaHeater={mount,position,open,decorateRoom,lighting,snapshot:()=>C.layout(saved,plans),isDragging:()=>!!active};window.CasaCloudRead.setHeaterLocation(saved.floor,saved.room);window.addEventListener('energychange',draw);window.addEventListener('roomnameschange',()=>{choices();draw()});setInterval(draw,1000);draw();
+ window.CasaHeater={applySharedPosition,mount,position,open,decorateRoom,lighting,snapshot:()=>C.layout(saved,plans),isDragging:()=>!!active};window.CasaCloudRead.setHeaterLocation(saved.floor,saved.room);window.addEventListener('energychange',draw);window.addEventListener('roomnameschange',()=>{choices();draw()});setInterval(draw,1000);draw();
 })();
