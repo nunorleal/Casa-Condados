@@ -27,7 +27,7 @@ test('kitchen reads both channels in one request, with separate activity and no 
  assert.equal(client.kitchenMeterSnapshot('hob').activity,true);
  assert.equal(client.kitchenMeterSnapshot('oven').activity,false);
  assert.deepEqual(client.roomPowerSnapshot().map(r=>[r.id,r.watts]),[['hob',900],['oven',10]]);
- powers=[0,10.1];time+=1000;
+ powers=[3,15.1];time+=1000;
  await client.refresh();
  assert.equal(client.kitchenMeterSnapshot('hob').activity,false);
  assert.equal(client.kitchenMeterSnapshot('oven').activity,true);
@@ -38,4 +38,23 @@ test('kitchen reads both channels in one request, with separate activity and no 
  assert.equal(client.healthSnapshot()[0].status,'offline');
  await assert.rejects(client.commandAppliance('hob',true));
  assert.equal(requests.length,3);
+});
+
+test('kitchen badges ignore the measured basal watts while preserving meter readings',async()=>{
+ let time=100000,powers=[3,10.8];
+ const client=Cloud.create({now:()=>time,interval:0,fetch:async()=>({
+  status:200,text:async()=>JSON.stringify([{id,online:true,status:{emeters:powers.map(power=>({power,total:2000}))}}])
+ })});
+ client.configure({server:'https://shelly-fixture.shelly.cloud',authKey:'FAKE'},null,null,null,null,null,null,null,null,{}, {}, {}, {},null,null,null,null,{}, {}, {},null,bindings);
+ await client.refresh();
+ for(const [index,name] of ['hob','oven'].entries()){
+  assert.equal(client.kitchenMeterSnapshot(name).activity,false);
+  assert.equal(client.kitchenMeterSnapshot(name).powerWatts,powers[index]);
+ }
+ powers=[10,15];time+=1000;await client.refresh();
+ assert.equal(client.kitchenMeterSnapshot('hob').activity,false);
+ assert.equal(client.kitchenMeterSnapshot('oven').activity,false);
+ powers=[10.01,15.01];time+=1000;await client.refresh();
+ assert.equal(client.kitchenMeterSnapshot('hob').activity,true);
+ assert.equal(client.kitchenMeterSnapshot('oven').activity,true);
 });
