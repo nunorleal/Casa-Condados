@@ -183,6 +183,7 @@
   activityDevices:()=>window.CasaMeteoActivity?.devices()||[],
   openActivityDevice,
   activitySnapshot:()=>window.CasaMeteoActivity?.snapshot()||[],
+  presenceSnapshot:()=>window.CasaPresence?.snapshot?.()||[],
   indoorSensors,selectIndoorSensor,
   bedroomClimate:()=>CasaMeteoCore.indoorClimate(selectedIndoorSensor(),indoorSensors(),id=>window.CasaCloudRead?.temperatureSnapshot(id)?.reading),
   realTemperature:()=>{const s=window.CasaCloudRead?.temperatureSnapshot();return CasaMeteoCore.realTemperature(s?.configured,s?.reading)},
