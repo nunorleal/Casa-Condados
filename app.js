@@ -16,6 +16,7 @@ function showFloor(id,animate=true){
  document.querySelectorAll('[data-floor]').forEach(b=>{if(b.dataset.floor===id)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current')});
  for(const room of p.rooms){const b=document.createElement('button');b.className='room-label'+(room.id.startsWith('stairs')?' stairs':'');b.dataset.room=room.id;b.dataset.roomFloor=id;b.dataset.x=room.x;b.dataset.y=room.y;b.textContent=window.CasaRoomNames.get(id,room.id);$('room-labels').append(b);window.CasaLabelLayout.mount(b,id,room);window.CasaRoomNames.bind(b,id,room.id,()=>openRoom(id,room))}
  window.CasaPlanView.reset($('plan-canvas').querySelector('svg'));if(animate&&previous!==id){stage.style.setProperty('--floor-direction',order.indexOf(id)>order.indexOf(previous)?'30px':'-30px');stage.classList.remove('changing');void stage.offsetWidth;stage.classList.add('changing');clearTimeout(floorAnimationTimer);floorAnimationTimer=setTimeout(()=>stage.classList.remove('changing'),400)}
+ window.dispatchEvent(new Event('floorchange'));
 }
 function openRoom(floor,room){
  if(document.querySelector('dialog[open]')||window.CasaMeteoBridge?.visible())return;
@@ -34,9 +35,7 @@ stage.addEventListener('click',e=>{
 });
 document.querySelectorAll('[data-floor]').forEach(b=>b.addEventListener('click',()=>showFloor(b.dataset.floor)));
 $('home-button').addEventListener('click',()=>showFloor('3'));
-const settingsDialog=$('settings-dialog'), plantDisplay=$('plant-display-settings');
-settingsDialog.addEventListener('close',()=>{plantDisplay.open=false});
-$('open-settings').addEventListener('click',()=>settingsDialog.showModal());
+$('open-settings').addEventListener('click',()=>{window.CasaSettingsMenu?.showMain();$('settings-dialog').showModal()});
 $('open-scenarios').addEventListener('click',()=>$('scenarios-dialog').showModal());
 document.querySelectorAll('[data-scene]').forEach(button=>button.addEventListener('click',async()=>{
  const action=button.dataset.scene,blinds=action.startsWith('blinds-'),on=action==='lights-on',open=action==='blinds-open';
@@ -45,7 +44,8 @@ document.querySelectorAll('[data-scene]').forEach(button=>button.addEventListene
 }));
 
 
-document.querySelectorAll('[data-close]').forEach(b=>b.addEventListener('click',()=>$(b.dataset.close).close()));
+function dismissPopup(dialog){if(dialog.id!=='settings-dialog'||!window.CasaSettingsMenu?.back())dialog.close()}
+document.querySelectorAll('[data-close]').forEach(b=>b.addEventListener('click',()=>dismissPopup($(b.dataset.close))));
 // Dismiss only a tap that starts and ends on the backdrop, never a drag from a field.
 document.querySelectorAll('dialog').forEach(dialog=>{
  let backdropPointer=null;
@@ -54,7 +54,7 @@ document.querySelectorAll('dialog').forEach(dialog=>{
  dialog.addEventListener('pointercancel',()=>{backdropPointer=null});
  dialog.addEventListener('click',e=>{
   const dismiss=backdropPointer!==null&&outside(e);backdropPointer=null;
-  if(dismiss&&dialog.open){e.preventDefault();e.stopPropagation();dialog.close()}
+  if(dismiss&&dialog.open){e.preventDefault();e.stopPropagation();dismissPopup(dialog)}
  });
  dialog.addEventListener('close',()=>{backdropPointer=null});
 });

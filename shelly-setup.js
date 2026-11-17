@@ -108,7 +108,8 @@
  const heaterGroup=document.createElement('details');heaterGroup.id='shelly-heater-group';heaterGroup.innerHTML='<summary>Termoventilador · equipamento móvel</summary><p>Controlo da alimentação e leitura de consumo. A localização na planta não altera esta associação.</p>';host.append(heaterGroup);
  const dehumidifierGroup=document.createElement('details');dehumidifierGroup.id='shelly-dehumidifier-group';dehumidifierGroup.innerHTML='<summary>Desumidificador · equipamento móvel</summary><p>Controlo da alimentação e leitura de consumo. A localização na planta não altera esta associação.</p>';host.append(dehumidifierGroup);
  function fieldset(parent,title,value,kind,key){
-  const box=document.createElement('fieldset');box.className='setup-device';const legend=document.createElement('legend');legend.textContent=title;box.append(legend);
+  const box=document.createElement('fieldset');box.className='setup-device';
+  if(['media','studio','balcony-meter','kitchen-meter'].includes(kind)||['dishwasherMeter','tvMeter'].includes(key))box.dataset.shellyCategory='media';const legend=document.createElement('legend');legend.textContent=title;box.append(legend);
   const fieldsHost=document.createElement('div');fieldsHost.className='setup-fields';
   const idLabel=document.createElement('label');idLabel.textContent='ID do dispositivo';const input=document.createElement('input');input.type='text';input.autocomplete='off';input.spellcheck=false;input.maxLength=32;input.value=value?.deviceId||'';input.placeholder='Por associar';input.pattern=(kind==='contact'||kind==='window'||kind==='sensor')?'(?:[a-fA-F0-9]{6,32}|[xX][bB][0-9]+)':'[a-fA-F0-9]{6,32}';idLabel.append(input);
   const channelLabel=document.createElement('label');channelLabel.textContent=(kind==='contact'||kind==='window'||kind==='sensor')?'Componente':'Canal';const channel=document.createElement('input');channel.type='number';channel.min=0;channel.max=(kind==='contact'||kind==='window'||kind==='sensor')?255:kind==='kitchen-meter'?1:15;channel.step=1;channel.value=value?.channel??0;channelLabel.append(channel);fieldsHost.append(idLabel,channelLabel);
@@ -243,7 +244,8 @@
   }catch(error){status(error.message,true)}
  });
  function open(floor,room){
-  for(const d of document.querySelectorAll('dialog[open]'))if(d!==$('settings-dialog'))d.close();if(!$('settings-dialog').open)$('settings-dialog').showModal();$('shelly-setup').open=true;
+  for(const d of document.querySelectorAll('dialog[open]'))if(d!==$('settings-dialog'))d.close();
+  window.CasaSettingsMenu.openShelly();
   if(floor&&room){const target=[...host.querySelectorAll('[data-setup-room]')].find(d=>d.dataset.setupRoom===C.key(floor,room));if(target){for(let p=target;p;p=p.parentElement)if(p.tagName==='DETAILS')p.open=true;target.scrollIntoView({block:'start',behavior:'auto'})}}
   else $('shelly-setup').scrollIntoView({block:'start',behavior:'auto'});
  }

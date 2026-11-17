@@ -121,3 +121,36 @@ test('an empty shared snapshot clears activity and invalid input does not invent
  assert.deepEqual(C.readShared([],time,time+360000,time),[]);
  assert.deepEqual(C.readShared([null,{id:'not-a-device',kind:'device',startedAt:time-1000},{id:'tv',kind:'timer',endsAt:time+1000}],time,time+360000,time),[]);
 });
+
+test('induction activity ignores basal power through 10W and resets its clock',()=>{
+ let now=100000;
+ const tracker=C.create({now:()=>now});
+ const reading=watts=>({...sample('hob',now),powerWatts:watts});
+ for(const watts of [0,1,9.9,10,null,NaN,-1])assert.deepEqual(tracker.update([reading(watts)]),[]);
+ assert.equal(tracker.update([reading(10.01)])[0].elapsed,0);
+ now+=20000;
+ assert.equal(tracker.update([reading(1000)])[0].elapsed,20);
+ assert.deepEqual(tracker.update([reading(10)]),[]);
+ now+=5000;
+ assert.equal(tracker.update([reading(11)])[0].elapsed,0);
+ assert.deepEqual(tracker.update([{...reading(11),fetchedAt:now-45001}]),[]);
+ assert.deepEqual(tracker.update([{...reading(11),configured:false}]),[]);
+});
+test('shared induction activity applies the 10W threshold to older emitter rows',()=>{
+ const now=100000;
+ const reading=powerWatts=>({id:'hob',kind:'device',startedAt:now-10000,powerWatts});
+ for(const watts of [0,1,9.9,10,null,NaN,-1])assert.deepEqual(C.readShared([reading(watts)],now,now+30000,now),[]);
+ assert.equal(C.readShared([reading(10.01)],now,now+30000,now)[0].id,'hob');
+ const oven={id:'oven',kind:'device',startedAt:now-10000,powerWatts:5};
+ assert.deepEqual(C.readShared([oven],now,now+30000,now),[]);
+});
+
+test('oven basal consumption through 15W is hidden locally and on receiving devices',()=>{
+ const now=100000,tracker=C.create({now:()=>now});
+ for(const watts of [0,10,10.8,15]){
+  assert.deepEqual(tracker.update([{...sample('oven',now),powerWatts:watts}]),[]);
+  assert.deepEqual(C.readShared([{id:'oven',kind:'device',startedAt:now-1000,powerWatts:watts}],now,now+30000,now),[]);
+ }
+ assert.equal(tracker.update([{...sample('oven',now),powerWatts:15.01}])[0].id,'oven');
+ assert.equal(C.readShared([{id:'oven',kind:'device',startedAt:now-1000,powerWatts:15.01}],now,now+30000,now)[0].id,'oven');
+});
