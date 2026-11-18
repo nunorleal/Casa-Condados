@@ -143,6 +143,7 @@
   window.CasaSettingsMenu = {
     back, showMain,
     openMeteo: () => openGroup(meteo),
+    openPlant: () => openGroup(plant),
     openShelly: () => openGroup(shelly)
   };
 })();

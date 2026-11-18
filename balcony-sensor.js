@@ -8,7 +8,9 @@
  window.addEventListener('bannersizechange',()=>{bannerScale=window.CasaBannerSize.value();position()});
  const entries=[{role:'meteo',floor:'3',name:'Varanda',room:'balcony-south',x:300,y:1495},{role:'garage',floor:'-1',name:'Garagem',room:'garage',x:805,y:650},{role:'living',floor:'3',name:'Sala',room:'living',x:300,y:1200},{role:'master',floor:'3',name:'Suite principal',room:'master',x:220,y:390}];
  for(const entry of entries){
- const badge=document.createElement('div');badge.className='balcony-sensor-badge';badge.hidden=true;badge.setAttribute('role','group');badge.innerHTML='<span></span><strong></strong><small></small>';badge.querySelector('span').textContent=entry.name;stage.append(badge);entry.badge=badge;badge.tabIndex=0;badge.dataset.sensor=entry.role;window.CasaSensorLayout.mount(badge,entry.floor,{...window.CasaLabelLayoutCore.sensorRoom(window.CasaPlans,entry.floor,entry.room),x:entry.x,y:entry.y});window.CasaRoomNames.bind(badge,entry.floor,entry.room);
+ const badge=document.createElement('div');badge.className='balcony-sensor-badge';badge.hidden=true;badge.setAttribute('role','button');badge.innerHTML='<span></span><strong></strong><small></small>';badge.querySelector('span').textContent=entry.name;stage.append(badge);entry.badge=badge;badge.tabIndex=0;badge.dataset.sensor=entry.role;window.CasaSensorLayout.mount(badge,entry.floor,{...window.CasaLabelLayoutCore.sensorRoom(window.CasaPlans,entry.floor,entry.room),x:entry.x,y:entry.y});window.CasaRoomNames.bind(badge,entry.floor,entry.room,()=>window.CasaSensorHistoryView?.open(entry.role));
+ badge.setAttribute('role','button');
+ badge.addEventListener('keydown',event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();event.stopPropagation();window.CasaSensorHistoryView?.open(entry.role)}});
  }
 
  const format=(v,unit)=>Number.isFinite(v)?v.toLocaleString('pt-PT',{maximumFractionDigits:1})+unit:'—'+unit;
@@ -20,7 +22,7 @@
   const text=format(t,' °C')+' · '+format(h,' %'),quality=(t!==null||h!==null)&&!fresh?'Última leitura':!r?'Por consultar':t===null&&h===null?'Indisponível':'';
   badge.querySelector('strong').textContent=text;const small=badge.querySelector('small');small.textContent=quality;small.hidden=!quality;
   badge.setAttribute('aria-label',name+' · Temperatura '+format(t,' graus Celsius')+' · Humidade '+format(h,' por cento')+(quality?' · '+quality:''));
-  badge.title='Duplo clique para editar o nome. Mantenha pressionado para desbloquear e mover. F2 também permite editar.'+(r?.fetchedAt?' Consultado na Cloud às '+new Date(r.fetchedAt).toLocaleTimeString('pt-PT'):'');
+  badge.title='Toque para consultar o histórico. Duplo clique para editar o nome. Mantenha pressionado para desbloquear e mover. F2 também permite editar.'+(r?.fetchedAt?' Consultado na Cloud às '+new Date(r.fetchedAt).toLocaleTimeString('pt-PT'):'');
   }position();
  }
  function position(){
