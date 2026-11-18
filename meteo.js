@@ -160,6 +160,23 @@
  });
  window.addEventListener('meteosettingsopen',loadFrame);
  function settings(){if(!host.hidden)home(false);window.CasaShellySetup.open()}
+ function openPresenceSettings(){
+  if(host.hidden||!window.CasaPresence?.openSettings)return false;
+  returnToMeteo=true;
+  setMeteoVisible(false);
+  window.CasaPresence.openSettings();
+  return true;
+ }
+ function openIndoorSensor(){
+  const id=selectedIndoorSensor();
+  if(host.hidden||!indoorSensors().some(sensor=>sensor.id===id&&sensor.configured))return false;
+  const places={master:['3','master'],living:['3','living'],meteo:['3','balcony-south'],garage:['-1','garage']};
+  const place=places[id];if(!place)return false;
+  home(false);
+  if(window.CasaFloors.current()!==place[0])window.CasaFloors.show(place[0]);
+  window.CasaRooms.open(...place);
+  return true;
+ }
  function toggleLamp(){return CasaMeteoCore.lampAction(window.CasaShelly,settings)}
  async function openMorningBlind({sunrise,sunset}={}){
   const context=()=>({red:!host.hidden&&!document.hidden&&frame.contentDocument?.querySelector('main')?.dataset.nightPalette==='red',now:Date.now(),sunrise,sunset});
@@ -181,9 +198,10 @@
   appVersion:()=>document.querySelector('meta[name="application-version"]')?.content,
   visible:()=>!host.hidden,preferences:CasaMeteoCore.preferences,ready,open,openFloor,home:()=>home(),settings,openMeteoSettings,settingsTarget:()=>document.getElementById('meteo-settings-content'),toggleLamp,openMorningBlind,
   activityDevices:()=>window.CasaMeteoActivity?.devices()||[],
-  openActivityDevice,
+  openActivityDevice,openIndoorSensor,openPresenceSettings,
   activitySnapshot:()=>window.CasaMeteoActivity?.snapshot()||[],
   presenceSnapshot:()=>window.CasaPresence?.snapshot?.()||[],
+  openSensorHistory:()=>{window.CasaSensorHistoryView?.open(selectedIndoorSensor(),undefined,frame,{red:frame.contentDocument?.documentElement.classList.contains('red-night')});},
   indoorSensors,selectIndoorSensor,
   bedroomClimate:()=>CasaMeteoCore.indoorClimate(selectedIndoorSensor(),indoorSensors(),id=>window.CasaCloudRead?.temperatureSnapshot(id)?.reading),
   realTemperature:()=>{const s=window.CasaCloudRead?.temperatureSnapshot();return CasaMeteoCore.realTemperature(s?.configured,s?.reading)},
