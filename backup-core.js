@@ -74,12 +74,8 @@
   if(clean.data.bannerScale===undefined&&(clean.data.sensorBannerScale!==undefined||clean.data.blindBannerScale!==undefined))clean.data.bannerScale=clean.data.sensorBannerScale??clean.data.blindBannerScale;
   const entries=Object.entries(clean.data).filter(([k])=>k!=='unifiCredentials').map(([k,v])=>[KEYS[k],JSON.stringify(v)]);
   if(hasUnifi)entries.push([unifiStorageKey,JSON.stringify({...backupCrypto().unifiConfig(unifi),revision:Date.now()})]);
-  const before=entries.map(([key])=>[key,storage.getItem(key)]),written=[];
-  try{for(const [key,value]of entries){written.push(key);storage.setItem(key,value)}}
-  catch{
-   let restored=true;for(const [key,old]of before.filter(([key])=>written.includes(key)).reverse()){try{if(old===null)storage.removeItem(key);else storage.setItem(key,old)}catch{restored=false}}
-   throw Error(restored?'Não foi possível guardar a importação. Os dados anteriores foram repostos.':'A importação falhou e não foi possível repor todos os dados anteriores. Guarde a cópia e tente novamente.');
-  }
+  const store=typeof module==='object'&&module.exports?require('./backup-storage.js'):globalThis.CasaBackupStorage;
+  store.write(storage,entries);
   return clean;
  }
  return {FORMAT,KEYS,create,validate,write};
