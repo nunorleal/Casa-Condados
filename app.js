@@ -46,18 +46,8 @@ document.querySelectorAll('[data-scene]').forEach(button=>button.addEventListene
 
 function dismissPopup(dialog){if(dialog.id!=='settings-dialog'||!window.CasaSettingsMenu?.back())dialog.close()}
 document.querySelectorAll('[data-close]').forEach(b=>b.addEventListener('click',()=>dismissPopup($(b.dataset.close))));
-// Dismiss only a tap that starts and ends on the backdrop, never a drag from a field.
-document.querySelectorAll('dialog').forEach(dialog=>{
- let backdropPointer=null;
- function outside(e){const r=dialog.getBoundingClientRect();return e.target===dialog&&(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)}
- dialog.addEventListener('pointerdown',e=>{backdropPointer=e.isPrimary&&e.button===0&&outside(e)?e.pointerId:null});
- dialog.addEventListener('pointercancel',()=>{backdropPointer=null});
- dialog.addEventListener('click',e=>{
-  const dismiss=backdropPointer!==null&&outside(e);backdropPointer=null;
-  if(dismiss&&dialog.open){e.preventDefault();e.stopPropagation();dismissPopup(dialog)}
- });
- dialog.addEventListener('close',()=>{backdropPointer=null});
-});
+// A backdrop tap dismisses the whole menu stack; drags from fields stay inside.
+window.CasaDialogDismiss.install(document,()=>{if(window.CasaSettingsShell)window.CasaSettingsShell.closeAll();else document.querySelectorAll('dialog[open]').forEach(d=>d.close())});
 function setLabelsVisible(visible,persist=false){
  document.body.classList.toggle('names-hidden',!visible);
  $('show-room-labels').checked=visible;
