@@ -7,7 +7,7 @@
   oven:'<rect x="2" y="4" width="20" height="16" rx="2"/><rect x="5" y="7" width="10" height="10" rx="1"/><path d="M18 8h1m-1 4h1m-1 4h1"/>'
  };
  const images={hob:'assets/placa-aeg.png',oven:'assets/forno-aeg.png'};
- const fmt=watts=>Number.isFinite(watts)?watts.toLocaleString('pt-PT',{maximumFractionDigits:1})+' W':'';
+ const fmt=watts=>Number.isFinite(watts)?Math.max(0,watts).toLocaleString('pt-PT',{maximumFractionDigits:1})+' W':'';
  const snapshot=id=>window.CasaCloudRead.kitchenMeterSnapshot(id);
  const caption=s=>s.offline?'Offline':!s.configured?'Por associar':s.activity===true?'A trabalhar':s.activity===false?'Sem atividade':'Atividade por confirmar';
 
