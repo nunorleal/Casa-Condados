@@ -83,3 +83,9 @@ body.room-power-mode #blind-window-controls{visibility:hidden!important;pointer-
 
 #shelly-setup-form label.shelly-disable-option{display:flex;align-items:center;gap:8px;min-height:34px;margin:4px 0 8px;cursor:pointer}
 #shelly-setup-form label.shelly-disable-option input[type=checkbox]{appearance:auto;width:18px;height:18px;flex:0 0 18px;margin:0;padding:0;accent-color:#427b93}
+
+/* Read-only window contact state, aligned with the room's control icons. */
+.room-window-state{display:grid;place-items:center;box-sizing:border-box;flex:none;color:#426e8c;pointer-events:none}
+.room-window-state svg{display:block;width:24px;height:24px}
+.room-window-state[data-state=open]{color:#bd5349;background:#fff0ed;border-color:#dca39c}
+.room-window-state[data-state=unknown]{color:#8897a4;background:#edf1f4;border-color:#c7d0d7}

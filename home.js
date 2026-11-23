@@ -135,7 +135,7 @@
    const a=new DOMPoint(h.x-pad,h.y-pad).matrixTransform(matrix),b=new DOMPoint(h.x+h.width+pad,h.y+h.height+pad).matrixTransform(matrix),box={left:Math.min(a.x,b.x),top:Math.min(a.y,b.y),width:Math.abs(b.x-a.x),height:Math.abs(b.y-a.y)};h.control.hidden=!box.width||!box.height;h.control.style.left=(box.left-rect.left)+'px';h.control.style.top=(box.top-rect.top)+'px';h.control.style.width=box.width+'px';h.control.style.height=box.height+'px';
   }
  }
- const icons={power:'<path d="M12 3v9M6.3 5.6a9 9 0 1 0 11.4 0"/>',refresh:'<path d="M3 12a9 9 0 0 1 15.74-6.26L21 8M21 3v5h-5M21 12a9 9 0 0 1-15.74 6.26L3 16M8 16H3v5"/>',blind:'<path d="M5 4h14M5 8h14M5 12h14M5 16h14M12 16v5"/>'};
+ const icons={power:'<path d="M12 3v9M6.3 5.6a9 9 0 1 0 11.4 0"/>',refresh:'<path d="M3 12a9 9 0 0 1 15.74-6.26L21 8M21 3v5h-5M21 12a9 9 0 0 1-15.74 6.26L3 16M8 16H3v5"/>',blind:'<rect x="3" y="3" width="18" height="14" rx="1"/><path d="M3 7h18M3 11h18M3 15h18M12 17v4"/>',history:'<path d="M4 3v17h17M8 16v-5m5 5V6m5 10V9"/>'};
  function roundButton(icon,name){const b=document.createElement('button');b.type='button';b.className='room-round';b.setAttribute('aria-label',name);b.title=name;b.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+icons[icon]+'</svg>';return b}
  function syncRoom(){
   if(!activeRoom)return;const {floor,room}=activeRoom,on=C.light(state,floor,room.id),host=$('room-controls');
@@ -143,7 +143,7 @@
 
   const dimmer=host.querySelector('[data-room-light-dimmer]');if(dimmer){const s=lightInfo(floor,room.id),slider=dimmer.querySelector('input'),output=dimmer.querySelector('output');dimmer.hidden=!s.supportsBrightness;slider.disabled=!s.canDim;if(slider.dataset.editing!=='true'){slider.value=Number.isFinite(s.brightness)?s.brightness:s.lastBrightness??0;output.textContent=Number.isFinite(s.brightness)?Math.round(s.brightness)+'%':Number.isFinite(s.lastBrightness)?Math.round(s.lastBrightness)+'% · Última leitura':'—';slider.setAttribute('aria-valuetext',output.textContent)}slider.setAttribute('aria-busy',String(!!s.pending));}
 
-  const sensor=$('room-header-sensor');if(sensor?.dataset.roomSensor){const d=window.CasaCloudRead.temperatureSnapshot(sensor.dataset.roomSensor),r=d.reading,fresh=!!r&&r.online&&!r.error&&Number.isFinite(r.fetchedAt)&&Date.now()>=r.fetchedAt&&Date.now()-r.fetchedAt<=120000;const fmt=(v,u)=>Number.isFinite(v)?v.toLocaleString('pt-PT',{maximumFractionDigits:1})+u:'—'+u;sensor.textContent=fmt(r?.temperature,' °C')+' · '+fmt(r?.humidity,' %')+(!fresh?' · '+(Number.isFinite(r?.temperature)||Number.isFinite(r?.humidity)?'Última leitura':'Por consultar'):'');}
+  const sensor=$('room-header-sensor');if(sensor?.dataset.roomSensor){const d=window.CasaCloudRead.temperatureSnapshot(sensor.dataset.roomSensor),r=d.reading,fresh=!!r&&r.online&&!r.error&&Number.isFinite(r.fetchedAt)&&Date.now()>=r.fetchedAt&&Date.now()-r.fetchedAt<=120000;const fmt=(v,u)=>Number.isFinite(v)?v.toLocaleString('pt-PT',{maximumFractionDigits:1})+u:'—'+u;sensor.textContent=fmt(r?.temperature,' °C')+' · '+fmt(r?.humidity,' %')+(!fresh?' · '+(Number.isFinite(r?.temperature)||Number.isFinite(r?.humidity)?'Última leitura':'Por consultar'):'');const rowReading=host.querySelector('[data-room-sensor="'+sensor.dataset.roomSensor+'"]');if(rowReading)rowReading.textContent=sensor.textContent;}
   for(const e of host.querySelectorAll('[data-room-meter]')){const d=e.dataset.roomMeter==='ev'?window.CasaCloudRead.evSnapshot():window.CasaCloudRead.snapshot(),p=d.powerKW??d.lastReading?.powerKW,total=d.energyKWh??d.lastReading?.energyKWh,fmt=(v,u)=>Number.isFinite(v)?v.toLocaleString('pt-PT',{maximumFractionDigits:3})+u:'—'+u;e.textContent=fmt(p,' kW')+' · '+'Hoje: '+window.CasaDailyEnergy.text(e.dataset.roomMeter==='ev'?'ev':'energy')+(!d.fresh?' · '+(d.lastReading?'Última leitura':'Por confirmar'):'')+(e.dataset.roomMeter==='ev'?' · Alimentação '+(d.feed===true?'ligada':d.feed===false?'desligada':'por confirmar'):'');}
   const siren=host.querySelector('[data-room-siren]');if(siren){const d=window.CasaCloudRead.alarmSnapshot();siren.textContent=!d.triggerConfigured?'Por associar':d.triggered===true?'Disparo detetado':d.triggered===false?'Sem disparo':'Por confirmar';}
   const alarm=host.querySelector('[data-alarm-reading]');if(alarm){const a=window.CasaCloudRead.alarmSnapshot();alarm.textContent=!a.configured?'Por associar':a.visual==='sounding'?'Alarme a tocar':a.armed===true?'Armado':a.armed===false?'Desarmado':'Por confirmar'}
@@ -165,6 +165,7 @@
 
   const role=floor==='-1'&&room.id==='garage'?'garage':floor==='3'?({master:'master',living:'living','balcony-south':'meteo'})[room.id]:null;
   const sensor=$('room-header-sensor');sensor.textContent='';delete sensor.dataset.roomSensor;sensor.hidden=!(role&&window.CasaCloudRead.temperatureSnapshot(role).configured);if(!sensor.hidden)sensor.dataset.roomSensor=role;
+  if(!sensor.hidden){const item=row('Temperatura e humidade','');item.p.dataset.roomSensor=role;const button=roundButton('history','Histórico de temperatura e humidade · '+room.name);button.addEventListener('click',()=>window.CasaSensorHistoryView?.open(role,room.name,button));item.e.append(button)}
   function detail(item,name,open){const button=roundButton('blind',name);button.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="m9 5 7 7-7 7"/></svg>';button.addEventListener('click',()=>{$('room-dialog').close();open()});item.e.append(button);}
   if(floor==='-1'&&room.id==='garage'){const item=row('Carregador do carro','');item.p.dataset.roomMeter='ev';detail(item,'Detalhes do carregador',()=>window.CasaEVRead.open());}
   if(floor==='3'&&room.id==='entrance'&&window.CasaCloudRead.snapshot().configured){const item=row('Contador geral','');item.p.dataset.roomMeter='home';detail(item,'Detalhes do contador geral',()=>window.CasaEnergy.open());}
@@ -186,7 +187,7 @@
   if(floor==='3'&&room.id==='living')window.CasaTV?.decorateRoom(host);window.CasaHeater?.decorateRoom(host,floor,room.id);window.CasaDehumidifier?.decorateRoom(host,floor,room.id);
   const feedback=document.createElement('p');feedback.id='room-feedback';feedback.setAttribute('role','status');feedback.className='room-feedback';host.append(feedback);
   if(floor==='-1'&&room.id==='garage')window.CasaFan?.decorateRoom(host);
-  window.CasaRoomPopup?.decorate(host);count.textContent=(host.querySelectorAll('.room-device-row').length+(sensor.hidden?0:1))+' equipamentos';syncRoom();
+  window.CasaRoomPopup?.decorate(host);count.textContent=(host.querySelectorAll('.room-device-row').length)+' equipamentos';syncRoom();
  }
  $('room-dialog').addEventListener('close',()=>{activeRoom=null});
  setInterval(()=>{if(activeRoom&&!document.hidden)syncRoom()},1000);
