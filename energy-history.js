@@ -86,4 +86,32 @@
  function extraDevice(dialogId,role,id,title,caption){const host=document.getElementById(dialogId);if(!host)return;let heading=host.querySelector('.history-extra-access');if(!heading){heading=document.createElement('div');heading.className='history-consumption-heading has-energy-history history-extra-access';const h=document.createElement('h3');h.textContent='Consumo';heading.append(h);host.append(heading)}const button=make();if(caption)button.querySelector('span').textContent=caption;shortcut(button,role,id,title);heading.append(button)}
  extraDevice('fan-dialog','fan','','Ventoinha da garagem');extraDevice('alarm-dialog','alarm','arm','Alarme · armação','Histórico · armação');extraDevice('alarm-dialog','alarm','trigger','Alarme · disparo','Histórico · disparo');
  window.CasaEnergyHistory={attach,attachInline};document.querySelectorAll('[data-daily-history-role]').forEach(n=>attach(n,n.dataset.dailyHistoryRole,n.dataset.dailyHistoryId));
+ // Horizontal touch gestures change the date window; vertical scroll and pinch zoom remain native.
+ let swipe=null,swipeClickUntil=0;
+ const releaseSwipe=id=>{if(dialog.hasPointerCapture?.(id))dialog.releasePointerCapture(id)};
+ dialog.addEventListener('pointerdown',event=>{
+  swipeClickUntil=0;
+  if(swipe){releaseSwipe(swipe.id);swipe=null}
+  if(!dialog.open||!event.isPrimary||!['touch','pen'].includes(event.pointerType)||(event.target.closest('button,input,select,textarea,summary,a,[contenteditable]')&&!event.target.closest('.history-chart,.presence-timeline,.presence-compare-lanes')))return;
+  const r=dialog.getBoundingClientRect();if(event.clientX<r.left||event.clientX>r.right||event.clientY<r.top||event.clientY>r.bottom)return;
+  swipe={id:event.pointerId,x:event.clientX,y:event.clientY,at:performance.now(),horizontal:false};
+ },{passive:true});
+ dialog.addEventListener('pointermove',event=>{
+  if(!swipe||event.pointerId!==swipe.id)return;
+  const x=Math.abs(event.clientX-swipe.x),y=Math.abs(event.clientY-swipe.y);
+  if(!swipe.horizontal&&y>12&&y>x){const id=swipe.id;swipe=null;releaseSwipe(id);return}
+  if(x>12&&x>y*1.4){swipe.horizontal=true;try{dialog.setPointerCapture(event.pointerId)}catch{}}
+  if(swipe.horizontal&&event.cancelable)event.preventDefault();
+ },{passive:false});
+ dialog.addEventListener('pointerup',event=>{
+  if(!swipe||event.pointerId!==swipe.id)return;
+  const start=swipe;swipe=null;releaseSwipe(start.id);
+  const x=event.clientX-start.x,y=event.clientY-start.y;
+  if(Math.abs(x)<48||Math.abs(x)<Math.abs(y)*1.4||performance.now()-start.at>1500)return;
+  swipeClickUntil=performance.now()+500;const button=dialog.querySelector(x<0?'#history-next':'#history-previous');if(button&&!button.disabled)button.click();
+ });
+ const cancelSwipe=()=>{const id=swipe?.id;swipe=null;if(id!==undefined)releaseSwipe(id)};
+ dialog.addEventListener('pointercancel',cancelSwipe);dialog.addEventListener('lostpointercapture',cancelSwipe);dialog.addEventListener('close',cancelSwipe);
+ dialog.addEventListener('click',event=>{if(event.detail>0&&performance.now()<swipeClickUntil){event.preventDefault();event.stopImmediatePropagation()}},true);
+
 })();

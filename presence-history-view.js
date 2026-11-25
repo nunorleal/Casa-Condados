@@ -24,7 +24,7 @@
   for(const [selector,text]of [['[data-stay-label]',label],['[data-stay-time]',duration],['[data-stay-since]',since]]){const node=$(selector);if(node.textContent!==text)node.textContent=text}
   $('.presence-stay').dataset.state=current.state;
  }
- function startTicker(){clearInterval(ticker);ticker=setInterval(()=>{if(dialog.open&&!document.hidden)stay()},1000)}
+ function startTicker(){clearInterval(ticker);ticker=setInterval(()=>{if(dialog.open&&!document.hidden){stay();renderChooser()}},1000)}
  function renderChooser(){
   const group=$('.presence-history-people'),all=people();
   if(!group.children.length)for(const p of all){
@@ -32,7 +32,7 @@
    const circle=document.createElement('span');circle.className='presence-history-photo';circle.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><circle cx="12" cy="8" r="3"/><path d="M5 20v-2a5 5 0 0 1 5-5h4a5 5 0 0 1 5 5v2"/></svg><img alt="" hidden>';
    const dot=document.createElement('span');dot.className='presence-history-dot';dot.setAttribute('aria-hidden','true');const name=document.createElement('span');name.className='presence-history-name';b.append(circle,dot,name);b.addEventListener('click',()=>{person=p.id;render()});group.append(b);
   }
-  for(const b of group.children){const p=all.find(p=>p.id===Number(b.dataset.person));b.setAttribute('aria-pressed',String(person===p.id));b.setAttribute('aria-label','Ver histórico de '+p.name);b.querySelector('.presence-history-name').textContent=p.name;
+  for(const b of group.children){const p=all.find(p=>p.id===Number(b.dataset.person));b.setAttribute('aria-pressed',String(person===p.id));const away=H.current(p.id).state==='away';b.classList.toggle('is-away',away);b.setAttribute('aria-label','Ver histórico de '+p.name+(away?' · Ausente':''));b.querySelector('.presence-history-name').textContent=p.name;
    const img=b.querySelector('img'),fallback=b.querySelector('svg');if(p.photo){if(img.getAttribute('src')!==p.photo)img.src=p.photo;img.hidden=false;fallback.hidden=true}else{img.removeAttribute('src');img.hidden=true;fallback.hidden=false}
   }
   $('[data-presence-together]').setAttribute('aria-pressed',String(person==='all'));
@@ -110,6 +110,34 @@
  dialog.querySelectorAll('[data-presence-period]').forEach(b=>b.addEventListener('click',()=>{period=b.dataset.presencePeriod;render()}));
  $('.presence-history-settings').addEventListener('click',()=>{dialog.close();if(window.CasaMeteoBridge?.visible())window.CasaMeteoBridge.openPresenceSettings();else window.CasaPresence?.openSettings()});
  document.addEventListener('click',e=>{const b=e.target.closest('[data-presence-history]');if(b){e.preventDefault();open(Number(b.dataset.presenceHistory),{trigger:b})}});
- document.addEventListener('visibilitychange',()=>{if(dialog.open&&!document.hidden)stay()});
+ document.addEventListener('visibilitychange',()=>{if(dialog.open&&!document.hidden){stay();renderChooser()}});
  window.addEventListener('presencehistorychange',()=>{if(dialog.open)render()});window.CasaPresenceHistoryView={open};
+ // Horizontal touch gestures change the date window; vertical scroll and pinch zoom remain native.
+ let swipe=null,swipeClickUntil=0;
+ const releaseSwipe=id=>{if(dialog.hasPointerCapture?.(id))dialog.releasePointerCapture(id)};
+ dialog.addEventListener('pointerdown',event=>{
+  swipeClickUntil=0;
+  if(swipe){releaseSwipe(swipe.id);swipe=null}
+  if(!dialog.open||!event.isPrimary||!['touch','pen'].includes(event.pointerType)||(event.target.closest('button,input,select,textarea,summary,a,[contenteditable]')&&!event.target.closest('.history-chart,.presence-timeline,.presence-compare-lanes')))return;
+  const r=dialog.getBoundingClientRect();if(event.clientX<r.left||event.clientX>r.right||event.clientY<r.top||event.clientY>r.bottom)return;
+  swipe={id:event.pointerId,x:event.clientX,y:event.clientY,at:performance.now(),horizontal:false};
+ },{passive:true});
+ dialog.addEventListener('pointermove',event=>{
+  if(!swipe||event.pointerId!==swipe.id)return;
+  const x=Math.abs(event.clientX-swipe.x),y=Math.abs(event.clientY-swipe.y);
+  if(!swipe.horizontal&&y>12&&y>x){const id=swipe.id;swipe=null;releaseSwipe(id);return}
+  if(x>12&&x>y*1.4){swipe.horizontal=true;try{dialog.setPointerCapture(event.pointerId)}catch{}}
+  if(swipe.horizontal&&event.cancelable)event.preventDefault();
+ },{passive:false});
+ dialog.addEventListener('pointerup',event=>{
+  if(!swipe||event.pointerId!==swipe.id)return;
+  const start=swipe;swipe=null;releaseSwipe(start.id);
+  const x=event.clientX-start.x,y=event.clientY-start.y;
+  if(Math.abs(x)<48||Math.abs(x)<Math.abs(y)*1.4||performance.now()-start.at>1500)return;
+  swipeClickUntil=performance.now()+500;const button=dialog.querySelector(x<0?'[data-next]':'[data-previous]');if(button&&!button.disabled)button.click();
+ });
+ const cancelSwipe=()=>{const id=swipe?.id;swipe=null;if(id!==undefined)releaseSwipe(id)};
+ dialog.addEventListener('pointercancel',cancelSwipe);dialog.addEventListener('lostpointercapture',cancelSwipe);dialog.addEventListener('close',cancelSwipe);
+ dialog.addEventListener('click',event=>{if(event.detail>0&&performance.now()<swipeClickUntil){event.preventDefault();event.stopImmediatePropagation()}},true);
+
 })();
